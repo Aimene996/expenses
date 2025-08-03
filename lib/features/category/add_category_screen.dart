@@ -205,7 +205,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
             ),
 
             // Select Button
-            Container(
+            SizedBox(
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
@@ -213,6 +213,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                     ? () {
                         // Handle category selection
                         Navigator.pop(context, selectedCategory);
+                        print('Selected Category: $selectedCategory');
                       }
                     : null,
                 style: ElevatedButton.styleFrom(

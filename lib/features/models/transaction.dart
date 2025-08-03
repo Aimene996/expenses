@@ -1,30 +1,33 @@
-// You can later add Hive annotations here
-import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:uuid/uuid.dart';
 
-class Transaction {
-  final String title;
-  final String subtitle;
+part 'transaction.g.dart'; // ✅ Required for Hive to generate the adapter
+
+@HiveType(typeId: 0)
+class Transaction extends HiveObject {
+  @HiveField(0)
+  final String id;
+
+  @HiveField(1)
+  final String type; // 'income' or 'expense'
+
+  @HiveField(2)
+  final String category;
+
+  @HiveField(3)
   final double amount;
-  final IconData icon;
-  final Color iconBackground;
+
+  @HiveField(4)
+  final DateTime date;
+
+  @HiveField(5)
+  final String note;
 
   Transaction({
-    required this.title,
-    required this.subtitle,
+    required this.type,
+    required this.category,
     required this.amount,
-    required this.icon,
-    required this.iconBackground,
-  });
-}
-
-class TransactionGroup {
-  final String month;
-  final String year;
-  final List<Transaction> transactions;
-
-  TransactionGroup({
-    required this.month,
-    required this.year,
-    required this.transactions,
-  });
+    required this.date,
+    required this.note,
+  }) : id = const Uuid().v4();
 }

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:mactest/features/models/transaction.dart';
+import 'package:mactest/features/services/data_service.dart';
 import 'package:mactest/features/transactions/add_new_transaction.dart';
 
 class TransactionsScreen extends StatefulWidget {
@@ -9,55 +12,27 @@ class TransactionsScreen extends StatefulWidget {
 }
 
 class _TransactionsScreenState extends State<TransactionsScreen> {
-  final List<TransactionGroup> transactionGroups = [
-    TransactionGroup(
-      month: 'March',
-      year: '2025',
-      transactions: [
-        Transaction(
-          title: 'Groceries',
-          subtitle: 'Grocery shopping',
-          amount: -120,
-          icon: Icons.shopping_cart,
-          iconBackground: const Color(0xFF374151),
-        ),
-        Transaction(
-          title: 'Rent',
-          subtitle: 'Rent payment',
-          amount: -800,
-          icon: Icons.home,
-          iconBackground: const Color(0xFF374151),
-        ),
-        Transaction(
-          title: 'Salary',
-          subtitle: 'Salary received',
-          amount: 2500,
-          icon: Icons.work,
-          iconBackground: const Color(0xFF374151),
-        ),
-      ],
-    ),
-    TransactionGroup(
-      month: 'February',
-      year: '2025',
-      transactions: [
-        Transaction(
-          title: 'Groceries',
-          subtitle: 'Grocery shopping',
-          amount: -120,
-          icon: Icons.shopping_cart,
-          iconBackground: const Color(0xFF374151),
-        ),
-        Transaction(
-          title: 'Rent',
-          subtitle: 'Rent payment',
-          amount: -800,
-          icon: Icons.home,
-          iconBackground: const Color(0xFF374151),
-        ),
-      ],
-    ),
-  ];
+  Map<String, List<Transaction>> groupedTransactions = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTransactions();
+  }
+
+  Future<void> _loadTransactions() async {
+    final allTransactions = TransactionHelper.getAllTransactions();
+    final Map<String, List<Transaction>> tempGrouped = {};
+
+    for (var tx in allTransactions) {
+      final key = DateFormat.yMMMM().format(tx.date); // e.g., March 2025
+      tempGrouped.putIfAbsent(key, () => []).add(tx);
+    }
+
+    setState(() {
+      groupedTransactions = tempGrouped;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,127 +53,142 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add, color: Colors.white, size: 24),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const AddNewTransaction(),
-                ),
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => AddNewTransaction()),
               );
-              // Navigate to Add Transaction screen
+              _loadTransactions(); // Refresh after adding
             },
           ),
         ],
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: transactionGroups.length,
-        itemBuilder: (context, groupIndex) {
-          final group = transactionGroups[groupIndex];
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Month Header
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      group.month,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      group.year,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+      body: groupedTransactions.isEmpty
+          ? const Center(
+              child: Text(
+                "No transactions",
+                style: TextStyle(color: Colors.white),
               ),
-
-              // Transactions List
-              ...group.transactions.asMap().entries.map((entry) {
-                final index = entry.key;
-                final transaction = entry.value;
-                final isLast = index == group.transactions.length - 1;
+            )
+          : ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              children: groupedTransactions.entries.map((entry) {
+                final dateKey = entry.key;
+                final txs = entry.value;
 
                 return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Dismissible(
-                      key: UniqueKey(),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(Icons.delete, color: Colors.white),
-                      ),
-                      onDismissed: (direction) {
-                        setState(() {
-                          group.transactions.removeAt(index);
-                        });
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('${transaction.title} deleted'),
+                    // Header: Month Year
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Text(
+                              dateKey,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
-                        );
-                      },
-                      child: _buildTransactionItem(transaction),
+                          const Spacer(),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Text(
+                              '2025', // You might want to derive this dynamically
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    if (!isLast) const SizedBox(height: 16),
+
+                    ...txs.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final transaction = entry.value;
+                      final isLast = index == txs.length - 1;
+
+                      return Column(
+                        children: [
+                          Dismissible(
+                            key: ValueKey(transaction.id),
+                            direction: DismissDirection.endToStart,
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.delete,
+                                color: Colors.white,
+                              ),
+                            ),
+                            onDismissed: (_) async {
+                              await TransactionHelper.deleteTransaction(
+                                transaction.id,
+                              );
+                              _loadTransactions();
+                            },
+                            child: _buildTransactionItem(transaction),
+                          ),
+                          if (!isLast) const SizedBox(height: 16),
+                        ],
+                      );
+                    }).toList(),
+
+                    const SizedBox(height: 32),
                   ],
                 );
-              }),
-
-              const SizedBox(height: 32),
-            ],
-          );
-        },
-      ),
+              }).toList(),
+            ),
     );
   }
 
   Widget _buildTransactionItem(Transaction transaction) {
+    final isIncome = transaction.type == 'income';
+    final prefix = isIncome ? '+' : '-';
+
     return Container(
       height: 64,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          // Icon Container
+          // Icon
           Container(
             width: 48,
             height: 48,
-            decoration: BoxDecoration(
-              color: transaction.iconBackground,
-              borderRadius: BorderRadius.circular(12),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
+            child: const Icon(
+              Icons.add_ic_call_outlined,
+              color: Colors.white,
+              size: 24,
             ),
-            child: Icon(transaction.icon, color: Colors.white, size: 24),
           ),
-
           const SizedBox(width: 16),
 
-          // Transaction Details
+          // Title + Note
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  transaction.title,
+                  transaction.category,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -207,11 +197,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  transaction.subtitle,
+                  transaction.note,
                   style: const TextStyle(
                     color: Color(0xFF9CA3AF),
                     fontSize: 14,
-                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],
@@ -220,13 +209,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
           // Amount
           Text(
-            transaction.amount > 0
-                ? '+\$${transaction.amount.abs()}'
-                : '-\$${transaction.amount.abs()}',
+            '$prefix\$${transaction.amount.toStringAsFixed(2)}',
             style: TextStyle(
-              color: transaction.amount > 0
-                  ? const Color(0xFF10B981)
-                  : Colors.white,
+              color: isIncome ? const Color(0xFF10B981) : Colors.white,
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
@@ -235,33 +220,4 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       ),
     );
   }
-}
-
-// Data Models
-class TransactionGroup {
-  final String month;
-  final String year;
-  final List<Transaction> transactions;
-
-  TransactionGroup({
-    required this.month,
-    required this.year,
-    required this.transactions,
-  });
-}
-
-class Transaction {
-  final String title;
-  final String subtitle;
-  final double amount;
-  final IconData icon;
-  final Color iconBackground;
-
-  Transaction({
-    required this.title,
-    required this.subtitle,
-    required this.amount,
-    required this.icon,
-    required this.iconBackground,
-  });
 }

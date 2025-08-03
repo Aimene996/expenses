@@ -23,12 +23,16 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               // Add action here
             },
-            icon: const Icon(Icons.add, size: 24),
+            icon: const Icon(Icons.add, size: 24, color: Colors.white),
             label: const Padding(
               padding: EdgeInsets.only(left: 16),
               child: Text(
                 'Add',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
             ),
             backgroundColor: Colors.blue, // Change as needed
@@ -49,16 +53,38 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             // Overview Header
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 20, 16, 12),
-              child: Align(
-                alignment: Alignment.centerLeft,
+            Container(
+              height: 60,
+
+              width: double.infinity,
+
+              child: const Padding(
+                padding: EdgeInsets.only(
+                  top: 20,
+                  bottom: 12,
+                  left: 16,
+                  right: 16,
+                ),
                 child: Text(
-                  'Overview',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  'Overview ',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'inter',
+                  ),
                 ),
               ),
             ),
+            // const Padding(
+            //   padding: EdgeInsets.fromLTRB(16, 20, 16, 12),
+            //   child: Align(
+            //     alignment: Alignment.centerLeft,
+            //     child: Text(
+            //       'Overview',
+            //       style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            //     ),
+            //   ),
+            // ),
 
             // Overview Section
             Container(
@@ -66,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
               width: double.infinity,
               margin: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: colorScheme.surface,
+                // color: colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -85,7 +111,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: 110,
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: colorScheme.secondary,
+                      // color: colorScheme.secondary,
+                      color: Color(0xFF293038),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -94,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Text(
                           'Savings',
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                            // fontWeight: FontWeight.bold,
                             fontSize: 16,
                             color: Colors.white,
                           ),
@@ -103,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Text(
                           '\$8,750',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 22,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -118,13 +145,18 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               height: 60,
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              // padding: const EdgeInsets.symmetric(horizontal: 16),
               alignment: Alignment.centerLeft,
-              child: const Padding(
-                padding: EdgeInsets.only(top: 20, bottom: 12),
-                child: Text(
-                  'Latest Activity',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  top: 20,
+                  bottom: 12,
+                  left: 16,
+                  right: 16,
+                ),
+                child: const Text(
+                  'Latest ',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -172,7 +204,8 @@ class _HomeScreenState extends State<HomeScreen> {
       width: 171,
       height: 110,
       decoration: BoxDecoration(
-        color: theme.colorScheme.secondary,
+        // color: theme.colorScheme.secondary,
+        color: Color(0xFF293038),
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(16),
@@ -181,10 +214,17 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Text(
             value,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            style: const TextStyle(fontSize: 16, color: Colors.white),
           ),
           const SizedBox(height: 8),
-          Text(title, style: TextStyle(fontSize: 14, color: theme.hintColor)),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 24,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ],
       ),
     );
@@ -214,7 +254,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: theme.cardColor,
+                  color: Color(0xFF293038),
+
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: theme.iconTheme.color),
@@ -227,13 +268,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                     title,
                     style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16,
                     ),
                   ),
                   Text(
                     subtitle,
-                    style: TextStyle(fontSize: 12, color: theme.hintColor),
+                    style: TextStyle(fontSize: 14, color: Color(0xFF9EABBA)),
                   ),
                 ],
               ),
@@ -241,7 +282,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Text(
             price,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
           ),
         ],
       ),

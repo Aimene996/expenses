@@ -17,7 +17,7 @@ class _NavigationTabBarState extends State<NavigationTabBar> {
   final List<Widget> _pages = [
     const HomeScreen(),
     const TransactionsScreen(),
-    const Text('Reports Screen'),
+    const ReportScreen(),
     const SettingsScreen(),
   ];
 

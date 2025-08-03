@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:mactest/features/category/add_category_screen.dart';
+import 'package:mactest/features/models/transaction.dart';
+import 'package:mactest/features/services/data_service.dart';
 
 class AddNewTransaction extends StatefulWidget {
-  const AddNewTransaction({super.key});
-
+  AddNewTransaction({super.key, this.selectedCategory});
+  String? selectedCategory;
   @override
   State<AddNewTransaction> createState() => _AddNewTransactionState();
 }
@@ -16,6 +18,29 @@ class _AddNewTransactionState extends State<AddNewTransaction> {
 
   @override
   Widget build(BuildContext context) {
+    void _saveTransaction() {
+      final String amountText = amountController.text.trim();
+      final String note = noteController.text.trim();
+
+      if (amountText.isEmpty || double.tryParse(amountText) == null) {
+        print('Invalid amount');
+        return;
+      }
+
+      final transaction = {
+        'type': selectedType,
+        'amount': double.parse(amountText),
+        'note': note,
+        'date': selectedDate.toIso8601String(),
+        'category': widget.selectedCategory ?? 'Uncategorized',
+      };
+
+      print('New Transaction: $transaction');
+
+      Navigator.pop(context);
+    }
+
+    final TransactionHelper transactionHelper = TransactionHelper();
     return Scaffold(
       backgroundColor: const Color(0xFF1A1D21),
       appBar: AppBar(
@@ -166,25 +191,32 @@ class _AddNewTransactionState extends State<AddNewTransaction> {
                 );
               },
               child: Container(
-                height: 48,
+                height: 72,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2A2D31),
+                  // color: const Color(0xFF2A2D31),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
+                    // SizedBox(width: 16),
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Color(0xFF2A2D31),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       child: Icon(
                         Icons.add,
-                        color: Color(0xFF9CA3AF),
-                        size: 20,
+                        color: Color.fromARGB(255, 255, 255, 255),
+                        size: 24,
                       ),
                     ),
+                    SizedBox(width: 12),
                     Text(
-                      'Add a category',
+                      widget.selectedCategory ?? 'Add Category',
                       style: TextStyle(
-                        color: Color(0xFF9CA3AF),
+                        color: Color.fromARGB(255, 255, 255, 255),
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                       ),
@@ -194,7 +226,7 @@ class _AddNewTransactionState extends State<AddNewTransaction> {
               ),
             ),
 
-            const SizedBox(height: 32),
+            // const SizedBox(height: 32),
 
             // Amount Section
             const Text(
@@ -324,9 +356,40 @@ class _AddNewTransactionState extends State<AddNewTransaction> {
               margin: const EdgeInsets.only(bottom: 16),
               child: ElevatedButton(
                 onPressed: () {
-                  // Handle save transaction
+                  final String amountText = amountController.text.trim();
+                  final String note = noteController.text.trim();
+
+                  if (amountText.isEmpty ||
+                      double.tryParse(amountText) == null) {
+                    print('Invalid amount');
+                    return;
+                  }
+
+                  final transaction = Transaction(
+                    type: selectedType,
+                    category:
+                        widget.selectedCategory ??
+                        'Uncategorized', // Replace with actual category
+                    amount: double.parse(amountText),
+                    date: selectedDate,
+                    note: note,
+
+                    // icon: Icons.money,
+                  );
+
+                  // Print the transaction before saving
+                  print('Saving transaction:');
+                  print('Type: ${transaction.type}');
+                  print('Category: ${transaction.category}');
+                  print('Amount: ${transaction.amount}');
+                  print('Date: ${transaction.date}');
+                  print('Note: ${transaction.note}');
+
+                  TransactionHelper.addTransaction(transaction);
+
                   Navigator.pop(context);
                 },
+
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFE5E7EB),
                   shape: RoundedRectangleBorder(
