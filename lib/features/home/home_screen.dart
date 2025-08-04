@@ -233,8 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: _buildTransactionRow(
           transaction.category,
           transaction.note,
-          (transaction.type == 'expense' ? '-' : '+') +
-              '\$${transaction.amount.toStringAsFixed(2)}',
+          '${transaction.type == 'expense' ? '-' : '+'}\$${transaction.amount.toStringAsFixed(2)}',
           Icons.shopping_bag_outlined,
         ),
       );

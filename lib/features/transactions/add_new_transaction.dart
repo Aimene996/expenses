@@ -6,8 +6,15 @@ import 'package:mactest/features/services/data_service.dart';
 
 class AddNewTransaction extends StatefulWidget {
   final String? selectedCategory;
+  final Icon? transactionIcon;
+  final String? transactionType;
 
-  const AddNewTransaction({super.key, this.selectedCategory});
+  const AddNewTransaction({
+    super.key,
+    this.selectedCategory,
+    this.transactionIcon,
+    this.transactionType,
+  });
 
   @override
   State<AddNewTransaction> createState() => _AddNewTransactionState();
@@ -16,7 +23,11 @@ class AddNewTransaction extends StatefulWidget {
 class _AddNewTransactionState extends State<AddNewTransaction> {
   String selectedType = 'expense';
   String? category;
+  IconData? selectedIcon;
+  String? transactionType;
+
   DateTime selectedDate = DateTime.now();
+  final IconData calendarIcon = Icons.calendar_today_outlined;
   final TextEditingController amountController = TextEditingController();
   final TextEditingController noteController = TextEditingController();
 
@@ -24,6 +35,7 @@ class _AddNewTransactionState extends State<AddNewTransaction> {
   void initState() {
     super.initState();
     category = widget.selectedCategory;
+    selectedIcon = widget.transactionIcon?.icon;
   }
 
   @override
@@ -61,12 +73,17 @@ class _AddNewTransactionState extends State<AddNewTransaction> {
   void _openCategorySelector() async {
     final newCategory = await Navigator.push<String>(
       context,
-      MaterialPageRoute(builder: (context) => const AddCategoryScreen()),
+
+      //need to pass the type of transaction to the category screen
+      MaterialPageRoute(
+        builder: (context) => AddCategoryScreen(transactionType: selectedType),
+      ),
     );
 
     if (newCategory != null) {
       setState(() {
         category = newCategory;
+        transactionType = widget.transactionType ?? 'Expense';
       });
     }
   }
@@ -80,15 +97,24 @@ class _AddNewTransactionState extends State<AddNewTransaction> {
       return;
     }
 
+    // final iconData = widget.transactionIcon?.icon ?? Icons.category;
+    // final fontFamily =
+    //     widget.transactionIcon?.icon?.fontFamily ?? 'MaterialIcons';
+
     final transaction = Transaction(
       type: selectedType,
       category: category ?? 'Uncategorized',
       amount: double.parse(amountText),
       date: selectedDate,
       note: note,
+      // iconCodePoint:
+      //     widget.transactionIcon?.icon?.codePoint ?? Icons.category.codePoint,
+      // iconFontFamily:
+      //     widget.transactionIcon?.icon?.fontFamily ?? 'MaterialIcons',
     );
 
     TransactionHelper.addTransaction(transaction);
+
     Navigator.pop(context);
   }
 

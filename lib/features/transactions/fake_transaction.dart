@@ -158,9 +158,10 @@ class _FakeTransactionState extends State<FakeTransaction> {
                             color: const Color(0xFF293038),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(
-                            Icons.monetization_on_outlined,
-                            color: Colors.white,
+                          child: Icon(
+                            tx.type == 'expense'
+                                ? Icons.arrow_downward
+                                : Icons.arrow_upward,
                           ),
                         ),
                         title: Text(tx.category, style: titleStyle),

@@ -1,7 +1,81 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:mactest/features/models/custom_category.dart';
 
-class AddCustomCategory extends StatelessWidget {
-  const AddCustomCategory({super.key});
+class AddCustomCategory extends StatefulWidget {
+  const AddCustomCategory({super.key, required this.transactionType});
+  final String transactionType;
+
+  @override
+  State<AddCustomCategory> createState() => _AddCustomCategoryState();
+}
+
+class _AddCustomCategoryState extends State<AddCustomCategory> {
+  final TextEditingController _controller = TextEditingController();
+  final IconData _defaultIcon = Icons.help_outline;
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _saveCustomCategory() async {
+    final String name = _controller.text.trim();
+
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a category name'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final newCategory = CustomCategory(
+        name: name,
+        iconCodePoint: Icons.flight.codePoint,
+        iconFontFamily: 'MaterialIcons',
+        type: widget.transactionType,
+      );
+
+      // Save to Hive
+      final box = await Hive.openBox<CustomCategory>('custom_categories');
+      await box.add(newCategory);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Category saved successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving category: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +95,6 @@ class AddCustomCategory extends StatelessWidget {
           },
         ),
       ),
-
       body: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
@@ -66,6 +139,8 @@ class AddCustomCategory extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: TextFormField(
+                          controller: _controller,
+                          enabled: !_isLoading,
                           decoration: const InputDecoration(
                             hintText: 'Category Name',
                             hintStyle: TextStyle(color: Colors.white70),
@@ -84,30 +159,43 @@ class AddCustomCategory extends StatelessWidget {
 
                     const Spacer(),
 
-                    // ✅ Save Button (Responsive at bottom)
+                    // Save Button
                     GestureDetector(
-                      onTap: () {
-                        // Handle save action
-                      },
+                      onTap: _isLoading ? null : _saveCustomCategory,
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: 24),
                         child: Container(
                           height: 50,
                           width: 390,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFCFDEED),
+                            color: _isLoading
+                                ? const Color(0xFFCFDEED).withOpacity(0.5)
+                                : const Color(0xFFCFDEED),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Center(
-                            child: Text(
-                              'Save',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.w700,
-                                fontSize: 16,
-                                color: Theme.of(context).colorScheme.secondary,
-                              ),
-                            ),
+                            child: _isLoading
+                                ? SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Theme.of(context).colorScheme.secondary,
+                                      ),
+                                    ),
+                                  )
+                                : Text(
+                                    'Save',
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 16,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.secondary,
+                                    ),
+                                  ),
                           ),
                         ),
                       ),

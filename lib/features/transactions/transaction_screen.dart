@@ -145,7 +145,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                           if (!isLast) const SizedBox(height: 16),
                         ],
                       );
-                    }).toList(),
+                    }),
 
                     const SizedBox(height: 32),
                   ],

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mactest/features/category/add_custom_category.dart';
+import 'package:mactest/features/category/category_item.dart';
 
 class AddCategoryScreen extends StatefulWidget {
-  const AddCategoryScreen({super.key});
+  const AddCategoryScreen({super.key, this.transactionType});
+  final String? transactionType;
 
   @override
   State<AddCategoryScreen> createState() => _AddCategoryScreenState();
@@ -11,115 +13,16 @@ class AddCategoryScreen extends StatefulWidget {
 class _AddCategoryScreenState extends State<AddCategoryScreen> {
   String? selectedCategory;
 
-  // All categories from both expense and income sections
-  final List<CategoryItem> allCategories = [
-    // Expense Categories
-    CategoryItem(
-      title: 'Groceries',
-      icon: Icons.shopping_cart_outlined,
-      type: 'Expense',
-    ),
-    CategoryItem(
-      title: 'Transportation',
-      icon: Icons.directions_car_outlined,
-      type: 'Expense',
-    ),
-    CategoryItem(
-      title: 'Utilities',
-      icon: Icons.receipt_outlined,
-      type: 'Expense',
-    ),
-    CategoryItem(
-      title: 'Mobile & Internet',
-      icon: Icons.wifi_outlined,
-      type: 'Expense',
-    ),
-    CategoryItem(
-      title: 'Rent/Mortgage',
-      icon: Icons.home_outlined,
-      type: 'Expense',
-    ),
-    CategoryItem(
-      title: 'Healthcare',
-      icon: Icons.local_hospital_outlined,
-      type: 'Expense',
-    ),
-    CategoryItem(
-      title: 'Clothing & Shoes',
-      icon: Icons.checkroom_outlined,
-      type: 'Expense',
-    ),
-    CategoryItem(
-      title: 'Entertainment',
-      icon: Icons.movie_outlined,
-      type: 'Expense',
-    ),
-    CategoryItem(
-      title: 'Education',
-      icon: Icons.school_outlined,
-      type: 'Expense',
-    ),
-    CategoryItem(title: 'Home', icon: Icons.home_filled, type: 'Expense'),
-    CategoryItem(
-      title: 'Gifts',
-      icon: Icons.card_giftcard_outlined,
-      type: 'Expense',
-    ),
-    CategoryItem(title: 'Pets', icon: Icons.pets_outlined, type: 'Expense'),
-    CategoryItem(
-      title: 'Sports & Fitness',
-      icon: Icons.fitness_center_outlined,
-      type: 'Expense',
-    ),
-    CategoryItem(
-      title: 'Children',
-      icon: Icons.child_friendly_outlined,
-      type: 'Expense',
-    ),
-    CategoryItem(
-      title: 'Insurances',
-      icon: Icons.security_outlined,
-      type: 'Expense',
-    ),
-    CategoryItem(
-      title: 'Taxes & Fines',
-      icon: Icons.receipt_long_outlined,
-      type: 'Expense',
-    ),
-    CategoryItem(
-      title: 'Travel',
-      icon: Icons.flight_takeoff_outlined,
-      type: 'Expense',
-    ),
-    CategoryItem(
-      title: 'Business Expenses',
-      icon: Icons.business_center_outlined,
-      type: 'Expense',
-    ),
-    CategoryItem(
-      title: 'Charity',
-      icon: Icons.volunteer_activism_outlined,
-      type: 'Expense',
-    ),
+  late List<CategoryItem> filteredCategories;
 
-    // Income Categories
-    CategoryItem(
-      title: 'Salary',
-      icon: Icons.attach_money_outlined,
-      type: 'Income',
-    ),
-    CategoryItem(
-      title: 'Bonuses',
-      icon: Icons.monetization_on_outlined,
-      type: 'Income',
-    ),
-    CategoryItem(title: 'Freelance', icon: Icons.work_outline, type: 'Income'),
-    CategoryItem(
-      title: 'Gifts',
-      icon: Icons.card_giftcard_outlined,
-      type: 'Income',
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    filteredCategories = allCategories.where((category) {
+      return category.type.toLowerCase() ==
+          (widget.transactionType?.toLowerCase() ?? '');
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +48,20 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Container(
+              height: 47,
+              child: Text(
+                widget.transactionType.toString() + ' Category',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
             Expanded(
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -154,15 +70,14 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
                 ),
-                itemCount: allCategories.length,
+                itemCount: filteredCategories.length,
                 itemBuilder: (context, index) {
-                  final category = allCategories[index];
+                  final category = filteredCategories[index];
                   final isSelected = selectedCategory == category.title;
 
                   return GestureDetector(
                     onTap: () {
                       setState(() {
-                        // If the same category is tapped again, deselect it
                         if (selectedCategory == category.title) {
                           selectedCategory = null;
                         } else {
@@ -218,13 +133,14 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
             Container(
               width: double.infinity,
               height: 48,
-              margin: const EdgeInsets.only(bottom: 16),
+              margin: EdgeInsets.only(bottom: 16),
               child: ElevatedButton(
                 onPressed: () {
-                  // Handle add custom category
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => const AddCustomCategory(),
+                      builder: (context) => AddCustomCategory(
+                        transactionType: widget.transactionType ?? '',
+                      ),
                     ),
                   );
                 },
@@ -253,9 +169,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               child: ElevatedButton(
                 onPressed: selectedCategory != null
                     ? () {
-                        // Handle category selection
                         Navigator.pop(context, selectedCategory);
-                        print('Selected Category: $selectedCategory');
                       }
                     : null,
                 style: ElevatedButton.styleFrom(
