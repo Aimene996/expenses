@@ -16,67 +16,109 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     // Expense Categories
     CategoryItem(
       title: 'Groceries',
-      icon: Icons.shopping_cart,
+      icon: Icons.shopping_cart_outlined,
       type: 'Expense',
     ),
     CategoryItem(
       title: 'Transportation',
-      icon: Icons.directions_car,
+      icon: Icons.directions_car_outlined,
       type: 'Expense',
     ),
-    CategoryItem(title: 'Utilities', icon: Icons.receipt, type: 'Expense'),
-    CategoryItem(title: 'Mobile & Internet', icon: Icons.wifi, type: 'Expense'),
-    CategoryItem(title: 'Rent/Mortgage', icon: Icons.home, type: 'Expense'),
+    CategoryItem(
+      title: 'Utilities',
+      icon: Icons.receipt_outlined,
+      type: 'Expense',
+    ),
+    CategoryItem(
+      title: 'Mobile & Internet',
+      icon: Icons.wifi_outlined,
+      type: 'Expense',
+    ),
+    CategoryItem(
+      title: 'Rent/Mortgage',
+      icon: Icons.home_outlined,
+      type: 'Expense',
+    ),
     CategoryItem(
       title: 'Healthcare',
-      icon: Icons.local_hospital,
+      icon: Icons.local_hospital_outlined,
       type: 'Expense',
     ),
     CategoryItem(
       title: 'Clothing & Shoes',
-      icon: Icons.checkroom,
+      icon: Icons.checkroom_outlined,
       type: 'Expense',
     ),
-    CategoryItem(title: 'Entertainment', icon: Icons.movie, type: 'Expense'),
-    CategoryItem(title: 'Education', icon: Icons.school, type: 'Expense'),
+    CategoryItem(
+      title: 'Entertainment',
+      icon: Icons.movie_outlined,
+      type: 'Expense',
+    ),
+    CategoryItem(
+      title: 'Education',
+      icon: Icons.school_outlined,
+      type: 'Expense',
+    ),
     CategoryItem(title: 'Home', icon: Icons.home_filled, type: 'Expense'),
-    CategoryItem(title: 'Gifts', icon: Icons.card_giftcard, type: 'Expense'),
-    CategoryItem(title: 'Pets', icon: Icons.pets, type: 'Expense'),
+    CategoryItem(
+      title: 'Gifts',
+      icon: Icons.card_giftcard_outlined,
+      type: 'Expense',
+    ),
+    CategoryItem(title: 'Pets', icon: Icons.pets_outlined, type: 'Expense'),
     CategoryItem(
       title: 'Sports & Fitness',
-      icon: Icons.fitness_center,
+      icon: Icons.fitness_center_outlined,
       type: 'Expense',
     ),
     CategoryItem(
       title: 'Children',
-      icon: Icons.child_friendly,
+      icon: Icons.child_friendly_outlined,
       type: 'Expense',
     ),
-    CategoryItem(title: 'Insurances', icon: Icons.security, type: 'Expense'),
+    CategoryItem(
+      title: 'Insurances',
+      icon: Icons.security_outlined,
+      type: 'Expense',
+    ),
     CategoryItem(
       title: 'Taxes & Fines',
-      icon: Icons.receipt_long,
+      icon: Icons.receipt_long_outlined,
       type: 'Expense',
     ),
-    CategoryItem(title: 'Travel', icon: Icons.flight_takeoff, type: 'Expense'),
+    CategoryItem(
+      title: 'Travel',
+      icon: Icons.flight_takeoff_outlined,
+      type: 'Expense',
+    ),
     CategoryItem(
       title: 'Business Expenses',
-      icon: Icons.business_center,
+      icon: Icons.business_center_outlined,
       type: 'Expense',
     ),
     CategoryItem(
       title: 'Charity',
-      icon: Icons.volunteer_activism,
+      icon: Icons.volunteer_activism_outlined,
       type: 'Expense',
     ),
 
     // Income Categories
-    CategoryItem(title: 'Salary', icon: Icons.attach_money, type: 'Income'),
-    CategoryItem(title: 'Bonuses', icon: Icons.monetization_on, type: 'Income'),
-    CategoryItem(title: 'Freelance', icon: Icons.work, type: 'Income'),
-    CategoryItem(title: 'Gifts', icon: Icons.card_giftcard, type: 'Income'),
-
-    // Other categories
+    CategoryItem(
+      title: 'Salary',
+      icon: Icons.attach_money_outlined,
+      type: 'Income',
+    ),
+    CategoryItem(
+      title: 'Bonuses',
+      icon: Icons.monetization_on_outlined,
+      type: 'Income',
+    ),
+    CategoryItem(title: 'Freelance', icon: Icons.work_outline, type: 'Income'),
+    CategoryItem(
+      title: 'Gifts',
+      icon: Icons.card_giftcard_outlined,
+      type: 'Income',
+    ),
   ];
 
   @override

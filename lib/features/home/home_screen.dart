@@ -3,6 +3,8 @@ import 'package:mactest/features/services/data_service.dart';
 import 'package:mactest/features/transactions/add_new_transaction.dart';
 import 'package:mactest/features/models/transaction.dart';
 
+const double horizontalPadding = 16.0;
+
 const TextStyle sectionTitleStyle = TextStyle(
   fontSize: 22,
   fontWeight: FontWeight.bold,
@@ -68,32 +70,42 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final horizontalPadding = screenWidth * 0.0;
     final cardWidth = (screenWidth - (horizontalPadding * 3)) / 2;
-    final savingsCardWidth = screenWidth - (horizontalPadding * 2);
 
     return Scaffold(
-      appBar: AppBar(centerTitle: true, elevation: 0),
+      appBar: AppBar(
+        centerTitle: true,
+        elevation: 0,
+        title: const Text(
+          'Home',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            fontFamily: 'inter',
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 120),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _sectionHeader('Overview', horizontalPadding),
-            Container(
-              height: 268,
-              width: double.infinity,
-              margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
+            _sectionHeader('Overview'),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: horizontalPadding,
+              ),
               child: Column(
                 children: [
                   const SizedBox(height: 16),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _buildStatCard(
                         '\$${totalIncome.toStringAsFixed(2)}',
                         'Income',
                         cardWidth,
                       ),
+                      const SizedBox(width: horizontalPadding),
                       _buildStatCard(
                         '\$${totalExpense.toStringAsFixed(2)}',
                         'Expenses',
@@ -103,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 12),
                   Container(
-                    width: savingsCardWidth.clamp(300.0, 400.0),
+                    width: double.infinity,
                     height: 120,
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
@@ -125,8 +137,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-            _sectionHeader('Latest', horizontalPadding),
-            ..._buildLatestTransactions(horizontalPadding),
+            _sectionHeader('Latest'),
+            ..._buildLatestTransactions(),
           ],
         ),
       ),
@@ -165,15 +177,15 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _sectionHeader(String title, double padding) {
+  Widget _sectionHeader(String title) {
     return Container(
       height: 60,
       alignment: Alignment.centerLeft,
-      padding: EdgeInsets.only(
+      padding: const EdgeInsets.only(
         top: 20,
         bottom: 12,
-        left: padding,
-        right: padding,
+        left: horizontalPadding,
+        right: horizontalPadding,
       ),
       child: Text(title, style: sectionTitleStyle),
     );
@@ -181,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildStatCard(String value, String title, double cardWidth) {
     return Container(
-      width: cardWidth.clamp(150.0, 200.0),
+      width: cardWidth.clamp(150.0, 180.0),
       height: 110,
       decoration: BoxDecoration(
         color: const Color(0xFF293038),
@@ -199,7 +211,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  List<Widget> _buildLatestTransactions(double horizontalPadding) {
+  List<Widget> _buildLatestTransactions() {
     final latest = List<Transaction>.from(allTransactions)
       ..sort((a, b) => b.date.compareTo(a.date));
     final latestThree = latest.take(3).toList();
@@ -224,7 +236,6 @@ class _HomeScreenState extends State<HomeScreen> {
           (transaction.type == 'expense' ? '-' : '+') +
               '\$${transaction.amount.toStringAsFixed(2)}',
           Icons.shopping_bag_outlined,
-          horizontalPadding,
         ),
       );
     }).toList();
@@ -235,12 +246,16 @@ class _HomeScreenState extends State<HomeScreen> {
     String subtitle,
     String price,
     IconData icon,
-    double horizontalPadding,
   ) {
     return Container(
       width: double.infinity,
       height: 72,
-      padding: EdgeInsets.fromLTRB(horizontalPadding, 8, horizontalPadding, 8),
+      padding: const EdgeInsets.fromLTRB(
+        horizontalPadding,
+        8,
+        horizontalPadding,
+        8,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

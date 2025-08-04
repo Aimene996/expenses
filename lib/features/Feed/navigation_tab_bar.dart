@@ -22,11 +22,11 @@ class _NavigationTabBarState extends State<NavigationTabBar> {
     const SettingsScreen(),
   ];
 
-  final List<IconData> _icons = [
-    Icons.home,
-    Icons.category,
-    Icons.data_usage,
-    Icons.settings,
+  final List<String> _iconPaths = [
+    'assets/four.png',
+    'assets/one.png',
+    'assets/two.png',
+    'assets/three.png',
   ];
 
   void _onItemTapped(int index) {
@@ -55,7 +55,7 @@ class _NavigationTabBarState extends State<NavigationTabBar> {
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: List.generate(_icons.length, (index) {
+          children: List.generate(_iconPaths.length, (index) {
             final isSelected = _selectedIndex == index;
 
             return Expanded(
@@ -64,8 +64,10 @@ class _NavigationTabBarState extends State<NavigationTabBar> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      _icons[index],
+                    Image.asset(
+                      _iconPaths[index],
+                      width: 24,
+                      height: 32,
                       color: isSelected
                           ? colorScheme.primary
                           : colorScheme.onSurface.withOpacity(0.5),
