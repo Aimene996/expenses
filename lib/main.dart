@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:mactest/features/models/transaction.dart';
-import 'package:mactest/features/navigation/navigation_tab_bar.dart';
+import 'package:mactest/features/Feed/navigation_tab_bar.dart';
 import 'package:mactest/theme/theme.dart';
 import 'package:path_provider/path_provider.dart';
 

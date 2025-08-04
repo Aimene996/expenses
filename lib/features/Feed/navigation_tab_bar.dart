@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mactest/features/home/home_screen.dart';
 import 'package:mactest/features/settings/settings_screen.dart';
 import 'package:mactest/features/static/static_screen.dart';
+import 'package:mactest/features/transactions/fake_transaction.dart';
 import 'package:mactest/features/transactions/transaction_screen.dart';
 
 class NavigationTabBar extends StatefulWidget {
@@ -16,7 +17,7 @@ class _NavigationTabBarState extends State<NavigationTabBar> {
 
   final List<Widget> _pages = [
     const HomeScreen(),
-    const TransactionsScreen(),
+    const FakeTransaction(),
     const ReportScreen(),
     const SettingsScreen(),
   ];

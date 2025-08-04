@@ -1,4 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:mactest/features/services/data_service.dart';
+import 'package:mactest/features/transactions/add_new_transaction.dart';
+import 'package:mactest/features/models/transaction.dart';
+
+const TextStyle sectionTitleStyle = TextStyle(
+  fontSize: 22,
+  fontWeight: FontWeight.bold,
+  fontFamily: 'inter',
+);
+
+const TextStyle cardTitleStyle = TextStyle(fontSize: 16, color: Colors.white);
+
+const TextStyle cardValueStyle = TextStyle(
+  fontSize: 24,
+  fontWeight: FontWeight.bold,
+  color: Colors.white,
+);
+
+const TextStyle subtitleStyle = TextStyle(
+  fontSize: 14,
+  color: Color(0xFF9EABBA),
+);
+
+const TextStyle amountTextStyle = TextStyle(
+  fontSize: 16,
+  fontWeight: FontWeight.w400,
+);
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -8,269 +35,208 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  List<Transaction> allTransactions = [];
+  double totalIncome = 0;
+  double totalExpense = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTransactions();
+  }
+
+  void _loadTransactions() {
+    final transactions = TransactionHelper.getAllTransactions();
+    double income = 0;
+    double expense = 0;
+
+    for (var t in transactions) {
+      if (t.type == 'income') {
+        income += t.amount;
+      } else if (t.type == 'expense') {
+        expense += t.amount;
+      }
+    }
+
+    setState(() {
+      allTransactions = transactions;
+      totalIncome = income;
+      totalExpense = expense;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
-    // Responsive values while maintaining original proportions
-    final horizontalPadding = screenWidth * 0.04; // 4% of screen width
-    final cardWidth =
-        (screenWidth - (horizontalPadding * 3)) / 2; // Responsive card width
-    final savingsCardWidth =
-        screenWidth - (horizontalPadding * 2); // Full width minus padding
+    final horizontalPadding = screenWidth * 0.0;
+    final cardWidth = (screenWidth - (horizontalPadding * 3)) / 2;
+    final savingsCardWidth = screenWidth - (horizontalPadding * 2);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        centerTitle: true,
-        elevation: 0,
-      ),
-      body: Stack(
-        children: [
-          // Main content with bottom padding to avoid FAB overlap
-          SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: 100), // Space for fixed button
+      appBar: AppBar(centerTitle: true, elevation: 0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 120),
+        child: Column(
+          children: [
+            _sectionHeader('Overview', horizontalPadding),
+            Container(
+              height: 268,
+              width: double.infinity,
+              margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
               child: Column(
                 children: [
-                  // Overview Header
-                  Container(
-                    height: 60,
-                    width: double.infinity,
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        top: 20,
-                        bottom: 12,
-                        left: horizontalPadding,
-                        right: horizontalPadding,
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildStatCard(
+                        '\$${totalIncome.toStringAsFixed(2)}',
+                        'Income',
+                        cardWidth,
                       ),
-                      child: const Text(
-                        'Overview ',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'inter',
-                        ),
+                      _buildStatCard(
+                        '\$${totalExpense.toStringAsFixed(2)}',
+                        'Expenses',
+                        cardWidth,
                       ),
-                    ),
+                    ],
                   ),
-
-                  // Overview Section
+                  const SizedBox(height: 12),
                   Container(
-                    height: 268,
-                    width: double.infinity,
-                    margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    width: savingsCardWidth.clamp(300.0, 400.0),
+                    height: 120,
+                    padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
+                      color: const Color(0xFF293038),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _buildStatCard(
-                              '\$12,500',
-                              'Income',
-                              context,
-                              cardWidth,
-                            ),
-                            _buildStatCard(
-                              '\$8,750',
-                              'Expenses',
-                              context,
-                              cardWidth,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Container(
-                          width: savingsCardWidth.clamp(
-                            300.0,
-                            400.0,
-                          ), // Responsive with limits
-                          height: 110,
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: Color(0xFF293038),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text(
-                                'Savings',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                '\$8,750',
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
+                        const Text('Savings', style: cardTitleStyle),
+                        const SizedBox(height: 8),
+                        Text(
+                          '\$${(totalIncome - totalExpense).toStringAsFixed(2)}',
+                          style: cardValueStyle,
                         ),
                       ],
                     ),
                   ),
-
-                  // Latest Header
-                  Container(
-                    height: 60,
-                    width: double.infinity,
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        top: 20,
-                        bottom: 12,
-                        left: horizontalPadding,
-                        right: horizontalPadding,
-                      ),
-                      child: const Text(
-                        'Latest ',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // Latest Flow Items
-                  _buildTransactionRow(
-                    'Freelance',
-                    'UI Design',
-                    '\$240.00',
-                    Icons.design_services,
-                    context,
-                    horizontalPadding,
-                  ),
-                  _buildTransactionRow(
-                    'Groceries',
-                    'Supermarket',
-                    '\$85.50',
-                    Icons.shopping_cart,
-                    context,
-                    horizontalPadding,
-                  ),
-                  _buildTransactionRow(
-                    'Subscription',
-                    'Netflix',
-                    '\$15.99',
-                    Icons.subscriptions,
-                    context,
-                    horizontalPadding,
-                  ),
-                  _buildTransactionRow(
-                    'Utilities',
-                    'Electricity Bill',
-                    '\$120.00',
-                    Icons.bolt,
-                    context,
-                    horizontalPadding,
-                  ),
                 ],
               ),
             ),
-          ),
-
-          // Fixed Add Button at Bottom
-          Positioned(
-            bottom: 20,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Container(
-                width: 112,
-                height: 56,
-                child: FloatingActionButton.extended(
-                  onPressed: () {
-                    // Add action here
-                  },
-                  icon: const Icon(Icons.add, size: 24, color: Colors.white),
-                  label: const Padding(
-                    padding: EdgeInsets.only(left: 16),
-                    child: Text(
-                      'Add',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28),
-                  ),
-                  elevation: 8, // Added elevation for better visibility
-                ),
+            _sectionHeader('Latest', horizontalPadding),
+            ..._buildLatestTransactions(horizontalPadding),
+          ],
+        ),
+      ),
+      floatingActionButton: SizedBox(
+        width: 112,
+        height: 56,
+        child: FloatingActionButton.extended(
+          onPressed: () async {
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const AddNewTransaction(),
+              ),
+            );
+            _loadTransactions();
+          },
+          icon: const Icon(Icons.add, size: 24, color: Colors.white),
+          label: const Padding(
+            padding: EdgeInsets.only(left: 16),
+            child: Text(
+              'Add',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
               ),
             ),
           ),
-        ],
+          backgroundColor: Colors.blue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
+          elevation: 8,
+        ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
-  // Stat Card - Now responsive
-  Widget _buildStatCard(
-    String title,
-    String value,
-    BuildContext context,
-    double cardWidth,
-  ) {
-    final theme = Theme.of(context);
-
+  Widget _sectionHeader(String title, double padding) {
     return Container(
-      width: cardWidth.clamp(150.0, 200.0), // Responsive with min/max limits
+      height: 60,
+      alignment: Alignment.centerLeft,
+      padding: EdgeInsets.only(
+        top: 20,
+        bottom: 12,
+        left: padding,
+        right: padding,
+      ),
+      child: Text(title, style: sectionTitleStyle),
+    );
+  }
+
+  Widget _buildStatCard(String value, String title, double cardWidth) {
+    return Container(
+      width: cardWidth.clamp(150.0, 200.0),
       height: 110,
       decoration: BoxDecoration(
-        color: Color(0xFF293038),
+        color: const Color(0xFF293038),
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            value,
-            style: const TextStyle(fontSize: 16, color: Colors.white),
-          ),
+          Text(title, style: cardTitleStyle),
           const SizedBox(height: 8),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 24,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          Text(value, style: cardValueStyle),
         ],
       ),
     );
   }
 
-  // Transaction Row - Now responsive
+  List<Widget> _buildLatestTransactions(double horizontalPadding) {
+    final latest = List<Transaction>.from(allTransactions)
+      ..sort((a, b) => b.date.compareTo(a.date));
+    final latestThree = latest.take(3).toList();
+
+    return latestThree.map((transaction) {
+      return Dismissible(
+        key: Key(transaction.id),
+        direction: DismissDirection.endToStart,
+        background: Container(
+          color: Colors.red,
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: const Icon(Icons.delete, color: Colors.white),
+        ),
+        onDismissed: (_) {
+          TransactionHelper.deleteTransaction(transaction.id);
+          _loadTransactions();
+        },
+        child: _buildTransactionRow(
+          transaction.category,
+          transaction.note,
+          (transaction.type == 'expense' ? '-' : '+') +
+              '\$${transaction.amount.toStringAsFixed(2)}',
+          Icons.shopping_bag_outlined,
+          horizontalPadding,
+        ),
+      );
+    }).toList();
+  }
+
   Widget _buildTransactionRow(
     String title,
     String subtitle,
     String price,
     IconData icon,
-    BuildContext context,
     double horizontalPadding,
   ) {
-    final theme = Theme.of(context);
-
     return Container(
       width: double.infinity,
       height: 72,
@@ -278,7 +244,6 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Icon + Text
           Expanded(
             child: Row(
               children: [
@@ -286,10 +251,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: Color(0xFF293038),
+                    color: const Color(0xFF293038),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, color: theme.iconTheme.color),
+                  child: Icon(icon, color: Colors.white),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -307,10 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       Text(
                         subtitle,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFF9EABBA),
-                        ),
+                        style: subtitleStyle,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
@@ -320,10 +282,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          Text(
-            price,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
-          ),
+          Text(price, style: amountTextStyle),
         ],
       ),
     );
