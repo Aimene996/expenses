@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [DropdownButton].
-
-const List<String> list = <String>[
+const List<String> list = [
   'Last 30 days',
   'This month',
   'Last month',
   'This week',
   'Last week',
-  'custom',
+  'Custom',
 ];
 
 class DropdownButtonExample extends StatefulWidget {
@@ -25,17 +23,17 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
   Widget build(BuildContext context) {
     return DropdownButton<String>(
       value: dropdownValue,
-      icon: const Icon(Icons.arrow_drop_down_outlined),
-      elevation: 16,
-      // style: const TextStyle(color: Colors.deepPurple),
-      // underline: Container(height: 2, color: Colors.deepPurpleAccent),
+      icon: const Icon(Icons.arrow_drop_down_outlined, color: Colors.white),
+      dropdownColor: const Color(0xFF1D2833),
+      underline: const SizedBox(),
       onChanged: (String? value) {
-        // This is called when the user selects an item.
-        setState(() {
-          dropdownValue = value!;
-        });
+        if (value != null) {
+          setState(() {
+            dropdownValue = value;
+          });
+        }
       },
-      items: list.map<DropdownMenuItem<String>>((String value) {
+      items: list.map((value) {
         return DropdownMenuItem<String>(
           value: value,
           child: Text(

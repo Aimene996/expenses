@@ -102,7 +102,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                     ),
-
                     const Padding(
                       padding: EdgeInsets.only(left: 26, top: 12, bottom: 4),
                       child: Text(
@@ -114,6 +113,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                     ),
+                    SizedBox(height: 8),
 
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -142,7 +142,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                     ),
-
+                    SizedBox(height: 8),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Wrap(
@@ -209,10 +209,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         // color: Theme.of(context).colorScheme.secondary,
-        color: Color(0xFF3B4754),
+        color: Color(0xFF2B3036),
 
         // #3B4754
-        border: Border.all(color: Theme.of(context).colorScheme.primary),
+        // border: Border.all(color: Theme.of(context).colorScheme.primary),
       ),
       child: Row(
         children: [

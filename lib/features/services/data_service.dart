@@ -40,14 +40,14 @@ class TransactionHelper {
   }
 }
 
-// currency_settings.dart
-@HiveType(typeId: 1)
-class CurrencySettings extends HiveObject {
-  @HiveField(0)
-  final String symbol;
+// // currency_settings.dart
+// @HiveType(typeId: 1)
+// class CurrencySettings extends HiveObject {
+//   @HiveField(0)
+//   final String symbol;
 
-  CurrencySettings({required this.symbol});
-}
+//   CurrencySettings({required this.symbol});
+// }
 
 // To generate adapters:
 // flutter pub run build_runner build --delete-conflicting-outputs

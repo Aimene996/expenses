@@ -25,7 +25,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     final Map<String, List<Transaction>> tempGrouped = {};
 
     for (var tx in allTransactions) {
-      final key = DateFormat.yMMMM().format(tx.date); // e.g., March 2025
+      final key = DateFormat.yMMMM().format(tx.date); // e.g., "March 2025"
       tempGrouped.putIfAbsent(key, () => []).add(tx);
     }
 
@@ -41,6 +41,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A1D21),
         elevation: 0,
+        centerTitle: true,
         title: const Text(
           'Transactions',
           style: TextStyle(
@@ -49,13 +50,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.add, color: Colors.white, size: 24),
+            icon: const Icon(Icons.add, color: Colors.white),
             onPressed: () async {
               await Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => AddNewTransaction()),
+                MaterialPageRoute(builder: (_) => const AddNewTransaction()),
               );
               _loadTransactions(); // Refresh after adding
             },
@@ -75,83 +75,74 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 final dateKey = entry.key;
                 final txs = entry.value;
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Header: Month Year
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
-                            child: Text(
-                              dateKey,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          const Spacer(),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
-                            child: Text(
-                              '2025', // You might want to derive this dynamically
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    ...txs.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final transaction = entry.value;
-                      final isLast = index == txs.length - 1;
-
-                      return Column(
-                        children: [
-                          Dismissible(
-                            key: ValueKey(transaction.id),
-                            direction: DismissDirection.endToStart,
-                            background: Container(
-                              alignment: Alignment.centerRight,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.delete,
-                                color: Colors.white,
-                              ),
-                            ),
-                            onDismissed: (_) async {
-                              await TransactionHelper.deleteTransaction(
-                                transaction.id,
-                              );
-                              _loadTransactions();
-                            },
-                            child: _buildTransactionItem(transaction),
-                          ),
-                          if (!isLast) const SizedBox(height: 16),
-                        ],
-                      );
-                    }),
-
-                    const SizedBox(height: 32),
-                  ],
-                );
+                return _buildTransactionGroup(dateKey, txs);
               }).toList(),
             ),
+    );
+  }
+
+  Widget _buildTransactionGroup(String dateKey, List<Transaction> txs) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header: Month Year
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Row(
+            children: [
+              Text(
+                dateKey,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                DateFormat.y().format(txs.first.date), // dynamic year
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        ...txs.asMap().entries.map((entry) {
+          final index = entry.key;
+          final transaction = entry.value;
+          final isLast = index == txs.length - 1;
+
+          return Column(
+            children: [
+              Dismissible(
+                key: ValueKey(transaction.id),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.delete, color: Colors.white),
+                ),
+                onDismissed: (_) async {
+                  await TransactionHelper.deleteTransaction(transaction.id);
+                  _loadTransactions();
+                },
+                child: _buildTransactionItem(transaction),
+              ),
+              if (!isLast) const SizedBox(height: 16),
+            ],
+          );
+        }),
+
+        const SizedBox(height: 32),
+      ],
     );
   }
 
@@ -168,7 +159,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       ),
       child: Row(
         children: [
-          // Icon
+          // Icon container
           Container(
             width: 48,
             height: 48,

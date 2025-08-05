@@ -1,56 +1,254 @@
 import 'package:flutter/material.dart';
+import 'package:mactest/features/models/transaction.dart';
+import 'package:mactest/features/services/data_service.dart';
 import 'package:mactest/features/static/widgets/chart.dart';
 import 'package:mactest/features/static/widgets/drop_down_button.dart';
 
 class ReportScreen extends StatefulWidget {
-  final int day;
-  final double amount;
-
-  const ReportScreen({super.key, required this.day, required this.amount});
+  const ReportScreen({super.key});
 
   @override
   State<ReportScreen> createState() => _ReportScreenState();
 }
 
 class _ReportScreenState extends State<ReportScreen> {
+  List<Transaction> allTransactions = [];
+  double totalIncome = 0;
+  double totalExpense = 0;
+
   @override
   void initState() {
     super.initState();
-
-    // Example check for passed amount
-    if (widget.amount != null) {
-      debugPrint('Amount received: ${widget.amount}');
-    } else {
-      debugPrint('No amount passed.');
-    }
+    _loadTransactions();
   }
 
-  // Consistent padding value used throughout the screen
-  static const double _horizontalPadding = 16.0;
+  void _loadTransactions() {
+    final transactions = TransactionHelper.getAllTransactions();
+    double income = 0;
+    double expense = 0;
+
+    for (var t in transactions) {
+      if (t.type == 'income') {
+        income += t.amount;
+      } else if (t.type == 'expense') {
+        expense += t.amount;
+      }
+    }
+
+    setState(() {
+      allTransactions = transactions;
+      totalIncome = income;
+      totalExpense = expense;
+    });
+
+    print('Total Income: $totalIncome, Total Expense: $totalExpense');
+  }
+
   static const double _verticalSpacing = 16.0;
-  static const double _listItemSpacing = 20.0;
+
+  Widget _buildTabContent({
+    required bool isExpenseTab,
+    required double horizontalPadding,
+    required double dropdownHeight,
+    required double chartHeight,
+    required double screenHeight,
+  }) {
+    final filteredTransactions = allTransactions
+        .where((tx) => tx.type == (isExpenseTab ? 'expense' : 'income'))
+        .toList();
+
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: _verticalSpacing),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+            child: Text(
+              isExpenseTab ? "Total Expenses" : "Income View",
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                fontFamily: 'Inter',
+              ),
+            ),
+          ),
+          const SizedBox(height: _verticalSpacing),
+          Container(
+            height: dropdownHeight.clamp(50.0, 80.0),
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+            child: DropdownButtonExample(),
+          ),
+          const SizedBox(height: _verticalSpacing),
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(horizontalPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isExpenseTab ? 'Expense' : 'Income',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  isExpenseTab
+                      ? '\$${totalExpense.toStringAsFixed(0)}'
+                      : '\$${totalIncome.toStringAsFixed(0)}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 32,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+                const SizedBox(height: _verticalSpacing),
+                SizedBox(
+                  height: chartHeight.clamp(180.0, 250.0),
+                  width: double.infinity,
+                  child: ChartWidget(
+                    selectedMonth: 'August',
+                    showDimensions: true,
+                    transactionType: isExpenseTab ? 'Expense' : 'Income',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: _verticalSpacing),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+            child: Text(
+              isExpenseTab ? "Expenses By Category" : "Income By Category",
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                fontFamily: 'Inter',
+              ),
+            ),
+          ),
+          const SizedBox(height: _verticalSpacing),
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(horizontalPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isExpenseTab ? 'Expense' : 'Income',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  isExpenseTab
+                      ? '\$${totalExpense.toStringAsFixed(0)}'
+                      : '\$${totalIncome.toStringAsFixed(0)}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 32,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'August',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+                const SizedBox(height: _verticalSpacing),
+                SizedBox(
+                  height: screenHeight * 0.4,
+                  child: ListView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: filteredTransactions.length,
+                    itemBuilder: (context, index) {
+                      final tx = filteredTransactions[index];
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12.0),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0,
+                            vertical: 4.0,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  tx.category,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    height: 22 / 13,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                height: 28.0,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(6.0),
+                                ),
+                                child: Text(
+                                  '\$${tx.amount.toStringAsFixed(0)}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    height: 22 / 13,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: screenHeight * 0.05),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    // Responsive values
-    final chartHeight = screenHeight * 0.25; // 25% of screen height
-    final dropdownHeight = screenHeight * 0.08; // 8% of screen height
-    final horizontalPadding = screenWidth * 0.04; // 4% of screen width
+    final chartHeight = screenHeight * 0.25;
+    final dropdownHeight = screenHeight * 0.08;
+    final horizontalPadding = screenWidth * 0.04;
 
     return DefaultTabController(
-      length: 3, // Three tabs
+      length: 3,
       child: Scaffold(
         backgroundColor: const Color(0xFF121417),
         appBar: AppBar(
           backgroundColor: const Color(0xFF121417),
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
+          // leading: IconButton(
+          //   icon: const Icon(Icons.arrow_back, color: Colors.white),
+          //   onPressed: () => Navigator.of(context).pop(),
+          // ),
           centerTitle: true,
           title: const Text(
             'Reports',
@@ -94,7 +292,7 @@ class _ReportScreenState extends State<ReportScreen> {
                       child: Center(child: Text('Income')),
                     ),
                   ),
-                  Tab(child: SizedBox(height: 53)), // Empty tab
+                  Tab(child: SizedBox(height: 53)),
                 ],
               ),
             ),
@@ -102,332 +300,20 @@ class _ReportScreenState extends State<ReportScreen> {
         ),
         body: TabBarView(
           children: [
-            // Expenses Tab - Fully Scrollable
-            SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: _verticalSpacing),
-
-                  // Expense title
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: horizontalPadding,
-                    ),
-                    child: const Text(
-                      "Total Expenses",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: _verticalSpacing),
-
-                  // Dropdown button
-                  Container(
-                    height: dropdownHeight.clamp(
-                      50.0,
-                      80.0,
-                    ), // Responsive with min/max
-                    width: double.infinity,
-                    // color: Colors.grey[800],
-                    padding: EdgeInsets.symmetric(
-                      horizontal: horizontalPadding,
-                    ),
-                    child: DropdownButtonExample(),
-                  ),
-
-                  const SizedBox(height: _verticalSpacing),
-
-                  // Place of chart
-                  Container(
-                    width: double.infinity,
-                    // color: Colors.green[800],
-                    padding: EdgeInsets.all(horizontalPadding),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Expense',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '\$${widget.amount.toStringAsFixed(2)}', // Displaying passed amount
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: 'Inter',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'August',
-                          style: TextStyle(color: Colors.white, fontSize: 16),
-                        ),
-                        const SizedBox(height: _verticalSpacing),
-                        Container(
-                          height: chartHeight.clamp(
-                            180.0,
-                            250.0,
-                          ), // Responsive with min/max
-                          width: double.infinity,
-                          // color: Colors.blue[800],
-                          child: ChartWidget(
-                            selectedMonth: 'August',
-                            showDimensions: true,
-                            transactionType: 'Expense',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: _verticalSpacing),
-
-                  // Expenses by Category title
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: horizontalPadding,
-                    ),
-                    child: const Text(
-                      "Expenses By Category",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: _verticalSpacing),
-
-                  // Category List
-                  Container(
-                    width: double.infinity,
-                    color: Colors.grey[800],
-                    padding: EdgeInsets.all(horizontalPadding),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Expense',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Chart Placeholder',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: 'Inter',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          '2025',
-                          style: TextStyle(color: Colors.white, fontSize: 16),
-                        ),
-                        const SizedBox(height: _verticalSpacing),
-                        ...List.generate(10, (index) {
-                          return Container(
-                            margin: EdgeInsets.only(
-                              bottom: index == 9
-                                  ? 0
-                                  : _listItemSpacing, // No margin after last item
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Category ${index + 1}",
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                                Text(
-                                  "\${(index + 1) * 100}",
-                                  style: const TextStyle(color: Colors.white70),
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                      ],
-                    ),
-                  ),
-
-                  // Extra spacing at bottom for better scrolling
-                  SizedBox(height: screenHeight * 0.05), // 5% of screen height
-                ],
-              ),
+            _buildTabContent(
+              isExpenseTab: true,
+              horizontalPadding: horizontalPadding,
+              dropdownHeight: dropdownHeight,
+              chartHeight: chartHeight,
+              screenHeight: screenHeight,
             ),
-
-            // Income Tab - Also Scrollable
-            SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: _verticalSpacing),
-
-                  // Income title
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: horizontalPadding,
-                    ),
-                    child: const Text(
-                      "Income View",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: _verticalSpacing),
-
-                  // Dropdown button
-                  Container(
-                    height: dropdownHeight.clamp(50.0, 80.0),
-                    width: double.infinity,
-                    color: Colors.grey[800],
-                    padding: EdgeInsets.symmetric(
-                      horizontal: horizontalPadding,
-                    ),
-                    child: const Center(
-                      child: Text(
-                        'Income Dropdown Placeholder',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: _verticalSpacing),
-
-                  // Place of chart
-                  Container(
-                    width: double.infinity,
-                    color: Colors.blue[800],
-                    padding: EdgeInsets.all(horizontalPadding),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Income',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Income Chart Placeholder',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: 'Inter',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          '2025',
-                          style: TextStyle(color: Colors.white, fontSize: 16),
-                        ),
-                        const SizedBox(height: _verticalSpacing),
-                        Container(
-                          height: chartHeight.clamp(180.0, 250.0),
-                          width: double.infinity,
-                          color: Colors.green[800],
-                          child: const Center(
-                            child: Text(
-                              'income chart placeholder',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: _verticalSpacing),
-
-                  // Income by Category title
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: horizontalPadding,
-                    ),
-                    child: const Text(
-                      "Income By Category",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: _verticalSpacing),
-
-                  // Income Category List
-                  Container(
-                    width: double.infinity,
-                    color: Colors.grey[800],
-                    padding: EdgeInsets.all(horizontalPadding),
-                    child: Column(
-                      children: List.generate(8, (index) {
-                        return Container(
-                          margin: EdgeInsets.only(
-                            bottom: index == 7 ? 0 : _listItemSpacing,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Income Source ${index + 1}",
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                              Text(
-                                "\${(index + 1) * 200}",
-                                style: const TextStyle(color: Colors.white70),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
-
-                  // Extra spacing at bottom
-                  SizedBox(height: screenHeight * 0.05),
-                ],
-              ),
+            _buildTabContent(
+              isExpenseTab: false,
+              horizontalPadding: horizontalPadding,
+              dropdownHeight: dropdownHeight,
+              chartHeight: chartHeight,
+              screenHeight: screenHeight,
             ),
-
-            // Empty Tab
             const SizedBox.shrink(),
           ],
         ),
