@@ -19,9 +19,9 @@ class Currency {
   // Create from Map
   factory Currency.fromMap(Map<String, dynamic> map) {
     return Currency(
-      code: map['code'] as String,
-      symbol: map['symbol'] as String,
-      name: map['name'] as String,
+      code: map['code'] as dynamic,
+      symbol: map['symbol'] as dynamic,
+      name: map['name'] as dynamic,
     );
   }
 

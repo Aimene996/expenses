@@ -21,9 +21,13 @@ class AddNewTransaction extends StatefulWidget {
 }
 
 class _AddNewTransactionState extends State<AddNewTransaction> {
+  //used to determine if the transaction is an expense or income
   String selectedType = 'expense';
+  //used to store the selected category and icon
   String? category;
+  //used to store the selected icon
   IconData? selectedIcon;
+  //used to store the type of transaction, either expense or income
   String? transactionType;
 
   DateTime selectedDate = DateTime.now();

@@ -18,8 +18,6 @@ class CustomCategoryAdapter extends TypeAdapter<CustomCategory> {
     };
     return CustomCategory(
       name: fields[0] as String,
-      iconCodePoint: fields[1] as int,
-      iconFontFamily: fields[2] as String,
       type: fields[3] as String,
     );
   }
@@ -27,13 +25,9 @@ class CustomCategoryAdapter extends TypeAdapter<CustomCategory> {
   @override
   void write(BinaryWriter writer, CustomCategory obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(2)
       ..writeByte(0)
       ..write(obj.name)
-      ..writeByte(1)
-      ..write(obj.iconCodePoint)
-      ..writeByte(2)
-      ..write(obj.iconFontFamily)
       ..writeByte(3)
       ..write(obj.type);
   }

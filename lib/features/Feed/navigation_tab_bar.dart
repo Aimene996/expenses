@@ -3,7 +3,6 @@ import 'package:mactest/features/home/home_screen.dart';
 import 'package:mactest/features/settings/settings_screen.dart';
 import 'package:mactest/features/static/static_screen.dart';
 import 'package:mactest/features/transactions/fake_transaction.dart';
-import 'package:mactest/features/transactions/transaction_screen.dart';
 
 class NavigationTabBar extends StatefulWidget {
   const NavigationTabBar({super.key});
@@ -18,7 +17,7 @@ class _NavigationTabBarState extends State<NavigationTabBar> {
   final List<Widget> _pages = [
     const HomeScreen(),
     const FakeTransaction(),
-    const ReportScreen(),
+    ReportScreen(day: 0, amount: 0.0),
     const SettingsScreen(),
   ];
 

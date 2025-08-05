@@ -3,8 +3,8 @@ import 'package:mactest/features/category/add_custom_category.dart';
 import 'package:mactest/features/category/category_item.dart';
 
 class AddCategoryScreen extends StatefulWidget {
-  const AddCategoryScreen({super.key, this.transactionType});
-  final String? transactionType;
+  const AddCategoryScreen({super.key, required this.transactionType});
+  final String transactionType; // Now required
 
   @override
   State<AddCategoryScreen> createState() => _AddCategoryScreenState();
@@ -12,15 +12,15 @@ class AddCategoryScreen extends StatefulWidget {
 
 class _AddCategoryScreenState extends State<AddCategoryScreen> {
   String? selectedCategory;
-
   late List<CategoryItem> filteredCategories;
 
   @override
   void initState() {
     super.initState();
+    // Filter based on type (e.g., "Expense" or "Income")
     filteredCategories = allCategories.where((category) {
       return category.type.toLowerCase() ==
-          (widget.transactionType?.toLowerCase() ?? '');
+          widget.transactionType.toLowerCase();
     }).toList();
   }
 
@@ -50,27 +50,25 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 47,
-              child: Text(
-                widget.transactionType.toString() + ' Category',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  fontFamily: 'Inter',
-                ),
+            Text(
+              '${widget.transactionType} Category',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                fontFamily: 'Inter',
               ),
             ),
+            const SizedBox(height: 12),
             Expanded(
               child: GridView.builder(
+                itemCount: filteredCategories.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   childAspectRatio: 3.5,
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
                 ),
-                itemCount: filteredCategories.length,
                 itemBuilder: (context, index) {
                   final category = filteredCategories[index];
                   final isSelected = selectedCategory == category.title;
@@ -78,11 +76,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                   return GestureDetector(
                     onTap: () {
                       setState(() {
-                        if (selectedCategory == category.title) {
-                          selectedCategory = null;
-                        } else {
-                          selectedCategory = category.title;
-                        }
+                        selectedCategory = isSelected ? null : category.title;
                       });
                     },
                     child: Container(
@@ -130,16 +124,15 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
             const SizedBox(height: 16),
 
             // Add Custom Category Button
-            Container(
+            SizedBox(
               width: double.infinity,
               height: 48,
-              margin: EdgeInsets.only(bottom: 16),
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => AddCustomCategory(
-                        transactionType: widget.transactionType ?? '',
+                      builder: (_) => AddCustomCategory(
+                        transactionType: widget.transactionType,
                       ),
                     ),
                   );
@@ -162,15 +155,15 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               ),
             ),
 
+            const SizedBox(height: 8),
+
             // Select Button
             SizedBox(
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
                 onPressed: selectedCategory != null
-                    ? () {
-                        Navigator.pop(context, selectedCategory);
-                      }
+                    ? () => Navigator.pop(context, selectedCategory)
                     : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: selectedCategory != null
@@ -200,6 +193,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   }
 }
 
+// Category item model stays the same
 class CategoryItem {
   final String title;
   final IconData icon;

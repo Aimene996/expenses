@@ -12,7 +12,6 @@ class AddCustomCategory extends StatefulWidget {
 
 class _AddCustomCategoryState extends State<AddCustomCategory> {
   final TextEditingController _controller = TextEditingController();
-  final IconData _defaultIcon = Icons.help_outline;
   bool _isLoading = false;
 
   @override
@@ -21,7 +20,7 @@ class _AddCustomCategoryState extends State<AddCustomCategory> {
     super.dispose();
   }
 
-  void _saveCustomCategory() async {
+  Future<void> _saveCustomCategory() async {
     final String name = _controller.text.trim();
 
     if (name.isEmpty) {
@@ -34,19 +33,14 @@ class _AddCustomCategoryState extends State<AddCustomCategory> {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
       final newCategory = CustomCategory(
         name: name,
-        iconCodePoint: Icons.flight.codePoint,
-        iconFontFamily: 'MaterialIcons',
         type: widget.transactionType,
       );
 
-      // Save to Hive
       final box = await Hive.openBox<CustomCategory>('custom_categories');
       await box.add(newCategory);
 
@@ -70,9 +64,7 @@ class _AddCustomCategoryState extends State<AddCustomCategory> {
       }
     } finally {
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
       }
     }
   }

@@ -1,7 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:mactest/features/static/widgets/chart.dart';
+import 'package:mactest/features/static/widgets/drop_down_button.dart';
 
-class ReportScreen extends StatelessWidget {
-  const ReportScreen({super.key});
+class ReportScreen extends StatefulWidget {
+  final int day;
+  final double amount;
+
+  const ReportScreen({super.key, required this.day, required this.amount});
+
+  @override
+  State<ReportScreen> createState() => _ReportScreenState();
+}
+
+class _ReportScreenState extends State<ReportScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    // Example check for passed amount
+    if (widget.amount != null) {
+      debugPrint('Amount received: ${widget.amount}');
+    } else {
+      debugPrint('No amount passed.');
+    }
+  }
 
   // Consistent padding value used throughout the screen
   static const double _horizontalPadding = 16.0;
@@ -113,16 +135,11 @@ class ReportScreen extends StatelessWidget {
                       80.0,
                     ), // Responsive with min/max
                     width: double.infinity,
-                    color: Colors.grey[800],
+                    // color: Colors.grey[800],
                     padding: EdgeInsets.symmetric(
                       horizontal: horizontalPadding,
                     ),
-                    child: const Center(
-                      child: Text(
-                        'Dropdown Placeholder',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
+                    child: DropdownButtonExample(),
                   ),
 
                   const SizedBox(height: _verticalSpacing),
@@ -130,7 +147,7 @@ class ReportScreen extends StatelessWidget {
                   // Place of chart
                   Container(
                     width: double.infinity,
-                    color: Colors.green[800],
+                    // color: Colors.green[800],
                     padding: EdgeInsets.all(horizontalPadding),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,8 +161,8 @@ class ReportScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          'Chart Placeholder',
+                        Text(
+                          '\$${widget.amount.toStringAsFixed(2)}', // Displaying passed amount
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 32,
@@ -155,7 +172,7 @@ class ReportScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         const Text(
-                          '2025',
+                          'August',
                           style: TextStyle(color: Colors.white, fontSize: 16),
                         ),
                         const SizedBox(height: _verticalSpacing),
@@ -165,16 +182,11 @@ class ReportScreen extends StatelessWidget {
                             250.0,
                           ), // Responsive with min/max
                           width: double.infinity,
-                          color: Colors.blue[800],
-                          child: const Center(
-                            child: Text(
-                              'chart placeholder',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                          // color: Colors.blue[800],
+                          child: ChartWidget(
+                            selectedMonth: 'August',
+                            showDimensions: true,
+                            transactionType: 'Expense',
                           ),
                         ),
                       ],
