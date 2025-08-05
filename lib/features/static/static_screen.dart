@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mactest/features/models/transaction.dart';
+import 'package:mactest/features/providers/currency_provider.dart';
 import 'package:mactest/features/services/data_service.dart';
 import 'package:mactest/features/static/widgets/chart.dart';
 import 'package:mactest/features/static/widgets/drop_down_button.dart';
+import 'package:provider/provider.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -40,8 +42,6 @@ class _ReportScreenState extends State<ReportScreen> {
       totalIncome = income;
       totalExpense = expense;
     });
-
-    print('Total Income: $totalIncome, Total Expense: $totalExpense');
   }
 
   static const double _verticalSpacing = 16.0;
@@ -52,6 +52,7 @@ class _ReportScreenState extends State<ReportScreen> {
     required double dropdownHeight,
     required double chartHeight,
     required double screenHeight,
+    required String currencySymbol,
   }) {
     final filteredTransactions = allTransactions
         .where((tx) => tx.type == (isExpenseTab ? 'expense' : 'income'))
@@ -80,7 +81,7 @@ class _ReportScreenState extends State<ReportScreen> {
             height: dropdownHeight.clamp(50.0, 80.0),
             width: double.infinity,
             padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-            child: DropdownButtonExample(),
+            child: const DropdownButtonExample(),
           ),
           const SizedBox(height: _verticalSpacing),
           Container(
@@ -100,8 +101,8 @@ class _ReportScreenState extends State<ReportScreen> {
                 const SizedBox(height: 8),
                 Text(
                   isExpenseTab
-                      ? '\$${totalExpense.toStringAsFixed(0)}'
-                      : '\$${totalIncome.toStringAsFixed(0)}',
+                      ? '$currencySymbol${totalExpense.toStringAsFixed(0)}'
+                      : '$currencySymbol${totalIncome.toStringAsFixed(0)}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 32,
@@ -153,8 +154,8 @@ class _ReportScreenState extends State<ReportScreen> {
                 const SizedBox(height: 8),
                 Text(
                   isExpenseTab
-                      ? '\$${totalExpense.toStringAsFixed(0)}'
-                      : '\$${totalIncome.toStringAsFixed(0)}',
+                      ? '$currencySymbol${totalExpense.toStringAsFixed(0)}'
+                      : '$currencySymbol${totalIncome.toStringAsFixed(0)}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 32,
@@ -203,7 +204,7 @@ class _ReportScreenState extends State<ReportScreen> {
                                   borderRadius: BorderRadius.circular(6.0),
                                 ),
                                 child: Text(
-                                  '\$${tx.amount.toStringAsFixed(0)}',
+                                  '$currencySymbol${tx.amount.toStringAsFixed(0)}',
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 13,
@@ -231,6 +232,10 @@ class _ReportScreenState extends State<ReportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currencySymbol = Provider.of<CurrencyProvider>(
+      context,
+    ).currency.symbol;
+
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -245,10 +250,6 @@ class _ReportScreenState extends State<ReportScreen> {
         appBar: AppBar(
           backgroundColor: const Color(0xFF121417),
           elevation: 0,
-          // leading: IconButton(
-          //   icon: const Icon(Icons.arrow_back, color: Colors.white),
-          //   onPressed: () => Navigator.of(context).pop(),
-          // ),
           centerTitle: true,
           title: const Text(
             'Reports',
@@ -292,7 +293,7 @@ class _ReportScreenState extends State<ReportScreen> {
                       child: Center(child: Text('Income')),
                     ),
                   ),
-                  Tab(child: SizedBox(height: 53)),
+                  Tab(child: SizedBox(height: 53)), // Optional third tab
                 ],
               ),
             ),
@@ -306,6 +307,7 @@ class _ReportScreenState extends State<ReportScreen> {
               dropdownHeight: dropdownHeight,
               chartHeight: chartHeight,
               screenHeight: screenHeight,
+              currencySymbol: currencySymbol,
             ),
             _buildTabContent(
               isExpenseTab: false,
@@ -313,6 +315,7 @@ class _ReportScreenState extends State<ReportScreen> {
               dropdownHeight: dropdownHeight,
               chartHeight: chartHeight,
               screenHeight: screenHeight,
+              currencySymbol: currencySymbol,
             ),
             const SizedBox.shrink(),
           ],

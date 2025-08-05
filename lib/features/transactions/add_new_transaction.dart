@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mactest/features/category/add_category_screen.dart';
 import 'package:mactest/features/models/transaction.dart';
+import 'package:mactest/features/providers/currency_provider.dart';
 import 'package:mactest/features/services/data_service.dart';
+import 'package:provider/provider.dart';
 
 class AddNewTransaction extends StatefulWidget {
   final String? selectedCategory;
@@ -240,33 +242,36 @@ class _AddNewTransactionState extends State<AddNewTransaction> {
             ),
 
             const SizedBox(height: 24),
-
             // Amount
             Align(
               alignment: Alignment.centerLeft,
               child: Text('Amount', style: textStyleLabel),
             ),
             const SizedBox(height: 12),
-            Container(
-              height: 48,
-              decoration: BoxDecoration(
-                color: const Color(0xFF2A2D31),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: TextField(
-                controller: amountController,
-                style: textStyleInput,
-                decoration: const InputDecoration(
-                  hintText: r'$0.00',
-                  hintStyle: TextStyle(color: Color(0xFF9CA3AF)),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
+            Consumer<CurrencyProvider>(
+              builder: (context, currencyProvider, _) {
+                return Container(
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2A2D31),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ),
-                keyboardType: TextInputType.number,
-              ),
+                  child: TextField(
+                    controller: amountController,
+                    style: textStyleInput,
+                    decoration: InputDecoration(
+                      hintText: '${currencyProvider.currency.symbol}0.00',
+                      hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                );
+              },
             ),
 
             const SizedBox(height: 24),

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:mactest/features/providers/currency_provider.dart';
+import 'package:mactest/features/services/settings_helper.dart';
 import 'package:mactest/features/settings/widgets/reset_dialog.dart';
+import 'package:mactest/features/models/currency.dart';
+import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -12,7 +16,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final List<String> incomeCategories = ['Salary'];
   final List<String> expensesCategories = ['Groceries'];
 
-  String selectedCurrency = 'USD';
+  String selectedCurrencyCode = 'USD';
 
   final List<String> currencies = [
     'USD – \$ – US Dollar',
@@ -21,11 +25,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
     'GBP – £ – British Pound',
     'AUD – A\$ – Australian Dollar',
     'CAD – C\$ – Canadian Dollar',
-    'CHF – Swiss Franc',
+    'CHF – CHF – Swiss Franc',
     'CNY – ¥ – Chinese Yuan',
     'HKD – HK\$ – Hong Kong Dollar',
     'RUB – ₽ – Russian Ruble',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrency();
+  }
+
+  Future<void> _loadCurrency() async {
+    final currency = await CurrencyService.getCurrency();
+    setState(() {
+      selectedCurrencyCode = currency.code;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,9 +66,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       width: 390,
                       height: 56,
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -64,20 +78,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                           ),
                           DropdownButton<String>(
-                            value: selectedCurrency,
+                            value: selectedCurrencyCode,
                             underline: const SizedBox(),
                             icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                            onChanged: (String? newValue) {
+                            onChanged: (String? newValue) async {
                               if (newValue != null) {
                                 setState(() {
-                                  selectedCurrency = newValue;
+                                  selectedCurrencyCode = newValue;
                                 });
+
+                                final match = currencies.firstWhere(
+                                  (c) => c.startsWith(newValue),
+                                );
+                                final parts = match.split(' – ');
+                                final selected = Currency(
+                                  code: parts[0],
+                                  symbol: parts[1],
+                                  name: parts[2],
+                                );
+
+                                // ✅ Use provider to update currency and notify listeners
+                                Provider.of<CurrencyProvider>(
+                                  context,
+                                  listen: false,
+                                ).updateCurrency(selected);
                               }
                             },
+
                             items: currencies.map((String value) {
+                              final code = value.split(' – ')[0];
                               return DropdownMenuItem<String>(
-                                value: value.split(' – ')[0],
-                                child: Text(value.split(' – ')[0]),
+                                value: code,
+                                child: Text(code),
                               );
                             }).toList(),
                           ),
@@ -113,7 +145,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
 
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -142,7 +174,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Wrap(
@@ -157,8 +189,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
 
-                    const Spacer(), // Push reset button to bottom if space allows
-                    // ✅ Reset Button at Bottom (dynamically)
+                    const Spacer(),
+
+                    // Reset button
                     GestureDetector(
                       onTap: () => showDialog(
                         context: context,
@@ -176,8 +209,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
-                          // color: Theme.of(context).colorScheme.secondary,
-                          color: Color(0xFF2B3036),
+                          color: const Color(0xFF2B3036),
                         ),
                         child: const Center(
                           child: Text(
@@ -208,11 +240,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        // color: Theme.of(context).colorScheme.secondary,
-        color: Color(0xFF2B3036),
-
-        // #3B4754
-        // border: Border.all(color: Theme.of(context).colorScheme.primary),
+        color: const Color(0xFF2B3036),
       ),
       child: Row(
         children: [

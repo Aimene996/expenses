@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mactest/features/services/data_service.dart';
 import 'package:mactest/features/transactions/add_new_transaction.dart';
 import 'package:mactest/features/models/transaction.dart';
+import 'package:provider/provider.dart';
+import 'package:mactest/features/providers/currency_provider.dart';
 
 const double horizontalPadding = 16.0;
 
@@ -69,6 +71,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currency = Provider.of<CurrencyProvider>(context).currency;
+    final symbol = currency.symbol;
+
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = (screenWidth - (horizontalPadding * 3)) / 2;
 
@@ -101,13 +106,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   Row(
                     children: [
                       _buildStatCard(
-                        '\$${totalIncome.toStringAsFixed(2)}',
+                        '$symbol${totalIncome.toStringAsFixed(0)}',
                         'Income',
                         cardWidth,
                       ),
                       const SizedBox(width: horizontalPadding),
                       _buildStatCard(
-                        '\$${totalExpense.toStringAsFixed(2)}',
+                        '$symbol${totalExpense.toStringAsFixed(0)}',
                         'Expenses',
                         cardWidth,
                       ),
@@ -128,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         const Text('Savings', style: cardTitleStyle),
                         const SizedBox(height: 8),
                         Text(
-                          '\$${(totalIncome - totalExpense).toStringAsFixed(2)}',
+                          '$symbol${(totalIncome - totalExpense).toStringAsFixed(0)}',
                           style: cardValueStyle,
                         ),
                       ],
@@ -138,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             _sectionHeader('Latest'),
-            ..._buildLatestTransactions(),
+            ..._buildLatestTransactions(symbol),
           ],
         ),
       ),
@@ -211,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  List<Widget> _buildLatestTransactions() {
+  List<Widget> _buildLatestTransactions(String symbol) {
     final latest = List<Transaction>.from(allTransactions)
       ..sort((a, b) => b.date.compareTo(a.date));
     final latestThree = latest.take(3).toList();
@@ -233,7 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: _buildTransactionRow(
           transaction.category,
           transaction.note,
-          '${transaction.type == 'expense' ? '-' : '+'}\$${transaction.amount.toStringAsFixed(2)}',
+          '${transaction.type == 'expense' ? '-' : '+'}$symbol${transaction.amount.toStringAsFixed(0)}',
           Icons.shopping_bag_outlined,
         ),
       );
