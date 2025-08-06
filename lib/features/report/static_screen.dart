@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mactest/features/models/transaction.dart';
 import 'package:mactest/features/providers/currency_provider.dart';
 import 'package:mactest/features/services/data_service.dart';
-import 'package:mactest/features/static/widgets/chart.dart';
-import 'package:mactest/features/static/widgets/drop_down_button.dart';
+import 'package:mactest/features/report/widgets/chart.dart';
+import 'package:mactest/features/report/widgets/drop_down_button.dart';
 import 'package:provider/provider.dart';
 
 class ReportScreen extends StatefulWidget {

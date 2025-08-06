@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mactest/features/category/add_category_screen.dart';
@@ -8,7 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 class AddNewTransaction extends StatefulWidget {
-  final String? selectedCategory;
+  final CategoryItem? selectedCategory;
   final Icon? transactionIcon;
   final String? transactionType;
 
@@ -25,7 +26,7 @@ class AddNewTransaction extends StatefulWidget {
 
 class _AddNewTransactionState extends State<AddNewTransaction> {
   String selectedType = 'expense';
-  String? category;
+  CategoryItem? category;
   IconData? selectedIcon;
   String? transactionType;
 
@@ -57,7 +58,7 @@ class _AddNewTransactionState extends State<AddNewTransaction> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.dark(
-              primary: Color(0xFF121417),
+              primary: Color(0xFF0F70CF),
               surface: Color(0xFF2A2D31),
             ),
           ),
@@ -73,7 +74,7 @@ class _AddNewTransactionState extends State<AddNewTransaction> {
   }
 
   void _openCategorySelector() async {
-    final newCategory = await Navigator.push<String>(
+    final newCategory = await Navigator.push<CategoryItem>(
       context,
       MaterialPageRoute(
         builder: (context) => AddCategoryScreen(transactionType: selectedType),
@@ -100,7 +101,7 @@ class _AddNewTransactionState extends State<AddNewTransaction> {
     final transaction = Transaction(
       id: const Uuid().v4(),
       type: selectedType,
-      category: category ?? 'Uncategorized',
+      category: category!=null ? category!.title: 'Uncategorized',
       amount: double.parse(amountText),
       date: selectedDate,
       note: note,
@@ -119,7 +120,7 @@ class _AddNewTransactionState extends State<AddNewTransaction> {
     );
 
     final textStyleInput = const TextStyle(
-      color: Color(0xFF9CA3AF),
+      color: Color(0xFFFFFFFF),
       fontSize: 14,
     );
 
@@ -227,14 +228,14 @@ class _AddNewTransactionState extends State<AddNewTransaction> {
                                   color: const Color(0xFF2A2D31),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Icon(
-                                  Icons.add,
+                                child:  Image.asset(
+                                  category!=null ? category!.imagePath:"assets/Home.png",
                                   color: Colors.white,
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                category ?? 'Add Category',
+                                category!=null ? category!.title: 'Add Category',
                                 style: textStyleInput.copyWith(
                                   color: Colors.white,
                                 ),
@@ -357,24 +358,27 @@ class _AddNewTransactionState extends State<AddNewTransaction> {
                       const Spacer(),
 
                       // Save Button
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton(
-                          onPressed: _saveTransaction,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFE5E7EB),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(26),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0, top: 16),
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed: _saveTransaction,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFE5E7EB),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(26),
+                              ),
+                              elevation: 0,
                             ),
-                            elevation: 0,
-                          ),
-                          child: const Text(
-                            'Save',
-                            style: TextStyle(
-                              color: Color(0xFF1A1D21),
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                            child: const Text(
+                              'Save',
+                              style: TextStyle(
+                                color: Color(0xFF1A1D21),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ),

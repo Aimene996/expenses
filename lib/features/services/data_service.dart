@@ -1,6 +1,7 @@
 // transaction_model.dart
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:mactest/features/category/add_category_screen.dart';
 import 'package:mactest/features/models/custom_category.dart';
 import 'package:mactest/features/models/transaction.dart';
 
@@ -15,6 +16,34 @@ enum DateFilterType {
 
 // helper: transaction_helper.dart
 class TransactionHelper {
+  static const _categoryBoxName = 'categories';
+
+  static final List<CategoryItem> _predefinedCategories = [
+    CategoryItem(title: 'Utilities', imagePath: 'assets/Groceries.png', type: 'Expense'),
+    CategoryItem(title: 'Mobile & Internet', imagePath: 'assets/Transportation.png', type: 'Expense'),
+    CategoryItem(title: 'Utilities', imagePath: 'assets/Utilities.png', type: 'Expense'),
+    CategoryItem(title: 'Mobile & Internet', imagePath: 'assets/Mobile & Internet.png', type: 'Expense'),
+    CategoryItem(title: 'Rent/Mortgage', imagePath: 'assets/Home.png', type: 'Expense'),
+    CategoryItem(title: 'Healthcare', imagePath: 'assets/Healthcare.png', type: 'Expense'),
+    CategoryItem(title: 'Clothing & Shoes', imagePath: 'assets/Clothing & Shoes.png', type: 'Expense'),
+    CategoryItem(title: 'Entertainment', imagePath: 'assets/Entertainment.png', type: 'Expense'),
+    CategoryItem(title: 'Education', imagePath: 'assets/Education.png', type: 'Expense'),
+    CategoryItem(title: 'Home', imagePath: 'assets/Home.png', type: 'Expense'),
+    CategoryItem(title: 'Gifts', imagePath: 'assets/Gifts.png', type: 'Expense'),
+    CategoryItem(title: 'Pets', imagePath: 'assets/Pets.png', type: 'Expense'),
+    CategoryItem(title: 'Sports & Fitness', imagePath: 'assets/Sports & Fitness.png', type: 'Expense'),
+    CategoryItem(title: 'Children', imagePath: 'assets/Children.png', type: 'Expense'),
+    CategoryItem(title: 'Insurances', imagePath: 'assets/Insurances.png', type: 'Expense'),
+    CategoryItem(title: 'Taxes & Fines', imagePath: 'assets/Taxes & Fines.png', type: 'Expense'),
+    CategoryItem(title: 'Travel', imagePath: 'assets/Travel.png', type: 'Expense'),
+    CategoryItem(title: 'Business Expenses', imagePath: 'assets/Business Expenses.png', type: 'Expense'),
+    CategoryItem(title: 'Charity', imagePath: 'assets/Charity.png', type: 'Expense'),
+    CategoryItem(title: 'Salary', imagePath: 'assets/Salary.png', type: 'Income'),
+    CategoryItem(title: 'Bonuses', imagePath: 'assets/Bonuses.png', type: 'Income'),
+    CategoryItem(title: 'Freelance', imagePath: 'assets/Freelance.png', type: 'Income'),
+    CategoryItem(title: 'Gifts', imagePath: 'assets/Gifts.png', type: 'Income'),
+  ];
+
   static final _box = Hive.box<Transaction>('transactions');
 
   static Future<void> addTransaction(Transaction transaction) async {
@@ -32,6 +61,13 @@ class TransactionHelper {
   static Future<void> deleteTransaction(String id) async {
     await _box.delete(id);
   }
+  static Future<void> initCategoryBox() async {
+    final box = await Hive.openBox<CategoryItem>(_categoryBoxName);
+    if (box.isEmpty) {
+      await box.addAll(_predefinedCategories);
+    }
+  }
+
 
   static Future<void> updateTransaction(
     String id,

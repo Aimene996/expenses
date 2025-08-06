@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:mactest/features/models/custom_category.dart';
+import 'package:mactest/features/models/category_item.dart';
 
 class AddCustomCategory extends StatefulWidget {
   const AddCustomCategory({super.key, required this.transactionType});
@@ -36,18 +36,16 @@ class _AddCustomCategoryState extends State<AddCustomCategory> {
     setState(() => _isLoading = true);
 
     try {
-      final newCategory = CustomCategory(
-        name: name,
+      final newCategory = CategoryItem(
+        title: name,
+        imagePath: 'assets/images/custom.png', // Provide a default icon
         type: widget.transactionType,
       );
 
-      final box = await Hive.openBox<CustomCategory>('custom_categories');
+      final box = await Hive.openBox<CategoryItem>('categories');
       await box.add(newCategory);
 
-      // ✅ Console confirmation
-      print(
-        '✅ Custom category "${newCategory.name}" added of type "${newCategory.type}"',
-      );
+      print('✅ Custom category "${newCategory.title}" added.');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -82,14 +80,12 @@ class _AddCustomCategoryState extends State<AddCustomCategory> {
         elevation: 0,
         centerTitle: true,
         title: const Text(
-          ' New Category',
+          'New Category',
           style: TextStyle(color: Colors.white),
         ),
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.white),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: LayoutBuilder(
@@ -100,20 +96,14 @@ class _AddCustomCategoryState extends State<AddCustomCategory> {
               child: IntrinsicHeight(
                 child: Column(
                   children: [
-                    // Title
                     Padding(
                       padding: const EdgeInsets.only(top: 319),
                       child: SizedBox(
                         height: 47,
                         width: 390,
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            top: 16,
-                            right: 16,
-                            left: 16,
-                            bottom: 8,
-                          ),
-                          child: const Text(
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
                             'Name the custom Categories',
                             style: TextStyle(
                               fontFamily: 'Inter',
@@ -127,7 +117,6 @@ class _AddCustomCategoryState extends State<AddCustomCategory> {
 
                     const SizedBox(height: 20),
 
-                    // Input
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Container(
@@ -156,43 +145,45 @@ class _AddCustomCategoryState extends State<AddCustomCategory> {
 
                     const Spacer(),
 
-                    // Save Button
-                    GestureDetector(
-                      onTap: _isLoading ? null : _saveCustomCategory,
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 24),
-                        child: Container(
-                          height: 50,
-                          width: 390,
-                          decoration: BoxDecoration(
-                            color: _isLoading
-                                ? const Color(0xFFCFDEED).withOpacity(0.5)
-                                : const Color(0xFFCFDEED),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Center(
-                            child: _isLoading
-                                ? SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Theme.of(context).colorScheme.secondary,
-                                      ),
-                                    ),
-                                  )
-                                : Text(
-                                    'Save',
-                                    style: TextStyle(
-                                      fontFamily: 'Inter',
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 16,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.secondary,
-                                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16),
+                      child: GestureDetector(
+                        onTap: _isLoading ? null : _saveCustomCategory,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 24),
+                          child: Container(
+                            height: 50,
+                            width: 390,
+                            decoration: BoxDecoration(
+                              color: _isLoading
+                                  ? const Color(0xFFCFDEED).withOpacity(0.5)
+                                  : const Color(0xFFCFDEED),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Center(
+                              child: _isLoading
+                                  ? SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Theme.of(context).colorScheme.secondary,
                                   ),
+                                ),
+                              )
+                                  : Text(
+                                'Save',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.secondary,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),

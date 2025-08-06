@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mactest/features/home/home_screen.dart';
 import 'package:mactest/features/settings/settings_screen.dart';
-import 'package:mactest/features/static/static_screen.dart';
-import 'package:mactest/features/transactions/fake_transaction.dart';
+import 'package:mactest/features/report/static_screen.dart';
+import 'package:mactest/features/transactions/transactions_screen.dart';
 
 class NavigationTabBar extends StatefulWidget {
   const NavigationTabBar({super.key});

@@ -92,39 +92,29 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      _buildStatCard(
-                        '$symbol${income.toStringAsFixed(0)}',
-                        'Income',
-                        cardWidth,
+                      Expanded(
+                        child: _buildStatCard(
+                          '$symbol${income.toStringAsFixed(0)}',
+                          'Income',
+                          cardWidth,
+                        ),
                       ),
                       const SizedBox(width: horizontalPadding),
-                      _buildStatCard(
-                        '$symbol${expense.toStringAsFixed(0)}',
-                        'Expenses',
-                        cardWidth,
+                      Expanded(
+                        child: _buildStatCard(
+                          '$symbol${expense.toStringAsFixed(0)}',
+                          'Expenses',
+                          cardWidth,
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    height: 120,
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF293038),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Savings', style: cardTitleStyle),
-                        const SizedBox(height: 8),
-                        Text(
-                          '$symbol${(income - expense).toStringAsFixed(0)}',
-                          style: cardValueStyle,
-                        ),
-                      ],
-                    ),
+                  _buildStatCard(
+                    //'$symbol${(income - expense).toStringAsFixed(0)}',
+                    (income - expense)==0?"\$0": (income - expense) > 0 ? '$symbol${(income - expense).toStringAsFixed(0)}' : '-$symbol${(income - expense).toStringAsFixed(0).substring(1, (income - expense).toStringAsFixed(0).length)}'
+                    ,'Savings',
+                    cardWidth,
                   ),
                 ],
               ),
@@ -146,15 +136,12 @@ class HomeScreen extends StatelessWidget {
             );
           },
           icon: const Icon(Icons.add, size: 24, color: Colors.white),
-          label: const Padding(
-            padding: EdgeInsets.only(left: 16),
-            child: Text(
-              'Add',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+          label: Text(
+            'Add',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
             ),
           ),
           backgroundColor: const Color(0xFF0F70CF),
@@ -184,15 +171,15 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildStatCard(String value, String title, double cardWidth) {
     return Container(
-      width: cardWidth.clamp(150.0, 180.0),
-      height: 110,
+      width: double.infinity,
       decoration: BoxDecoration(
         color: const Color(0xFF293038),
         borderRadius: BorderRadius.circular(12),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: cardTitleStyle),
           const SizedBox(height: 8),

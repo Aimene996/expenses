@@ -11,7 +11,7 @@ class AddCategoryScreen extends StatefulWidget {
 }
 
 class _AddCategoryScreenState extends State<AddCategoryScreen> {
-  String? selectedCategory;
+  CategoryItem? selectedCategory;
   late List<CategoryItem> filteredCategories;
 
   @override
@@ -37,7 +37,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Add Category',
+          'Categories',
           style: TextStyle(
             color: Colors.white,
             fontSize: 18,
@@ -72,12 +72,12 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                 ),
                 itemBuilder: (context, index) {
                   final category = filteredCategories[index];
-                  final isSelected = selectedCategory == category.title;
+                  final isSelected = selectedCategory!=null && selectedCategory!.title == category.title;
 
                   return GestureDetector(
                     onTap: () {
                       setState(() {
-                        selectedCategory = isSelected ? null : category.title;
+                        selectedCategory = isSelected ? null : category;
                       });
                     },
                     child: Container(

@@ -254,6 +254,7 @@ class _FakeTransactionState extends State<FakeTransaction> {
                                 color: const Color(0xFF293038),
                                 borderRadius: BorderRadius.circular(8),
                               ),
+                              // todo: make category in transaction object as a category object not a string
                               child: Icon(
                                 tx.type == 'expense'
                                     ? Icons.arrow_downward

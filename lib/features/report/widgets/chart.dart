@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mactest/features/services/data_service.dart';
-import 'package:mactest/features/static/static_screen.dart';
+import 'package:mactest/features/report/static_screen.dart';
 
 class ChartWidget extends StatefulWidget {
   final String selectedMonth;

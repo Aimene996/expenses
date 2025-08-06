@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:mactest/features/models/category_item.dart';
 import 'package:mactest/features/providers/custom_category.dart';
 // import 'package:mactest/features/providers/custom_category.dart';
 import 'package:mactest/features/providers/transaction_provider.dart';
+import 'package:mactest/features/services/data_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -30,14 +32,14 @@ void main() async {
   await Hive.initFlutter(appDocDir.path);
 
   // Register Hive Adapters
+  //Hive.registerAdapter(CategoryItemAdapter());
   Hive.registerAdapter(TransactionAdapter());
-  Hive.registerAdapter(CustomCategoryAdapter());
   Hive.registerAdapter(CurrencyAdapter());
 
   // Open Hive Boxes
   await Hive.openBox<Transaction>('transactions');
-  await Hive.openBox<CustomCategory>('custom_categories');
   await Hive.openBox<Currency>('currencyBox');
+  //await TransactionHelper.initCategoryBox();
 
   // Run App with Providers
   runApp(
