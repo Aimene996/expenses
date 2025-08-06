@@ -70,6 +70,36 @@ flutter:
     - assets/two.png
     - assets/three.png
     - assets/four.png
+    - assets/Home.png
+    - assets/Business Expenses.png
+    - assets/Charity.png
+    - assets/Children.png
+    - assets/Clothing & Shoes.png
+    - assets/Education.png
+    - assets/Entertainment.png
+    - assets/four.png
+    - assets/Gifts.png
+    - assets/Healthcare.png
+    - assets/Home.png
+    - assets/Insurances.png
+    - assets/Mobile & Internet.png
+    - assets/one.png
+    - assets/Other.png
+    - assets/Pets.png
+    - assets/Sports & Fitness.png
+    - assets/Taxes & Fines.png
+    - assets/three.png
+    - assets/Travel.png
+    - assets/two.png
+    - assets/Utilities.png
+    - assets/Freelance.png
+    - assets/Gifts.png
+    - assets/Bonuses.png
+    - assets/Salary.png
+    - assets/Groceries.png
+    - assets/Transportation.png
+  # An asset can be a file or a directory. If the asset is a directory, then
+    
 
 
 

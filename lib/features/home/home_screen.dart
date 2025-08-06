@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:mactest/features/services/data_service.dart';
-import 'package:mactest/features/transactions/add_new_transaction.dart';
+import 'package:mactest/features/models/custom_category.dart';
 import 'package:mactest/features/models/transaction.dart';
-import 'package:provider/provider.dart';
 import 'package:mactest/features/providers/currency_provider.dart';
+import 'package:mactest/features/providers/transaction_provider.dart';
+import 'package:mactest/features/services/custom_category_helper.dart';
+import 'package:mactest/features/transactions/add_new_transaction.dart';
+import 'package:provider/provider.dart';
 
 const double horizontalPadding = 16.0;
 
@@ -31,26 +33,26 @@ const TextStyle amountTextStyle = TextStyle(
   fontWeight: FontWeight.w400,
 );
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
+  Widget build(BuildContext context) {
+    Future.microtask(() async {
+      final customCategories =
+          await CustomCategoryHelper.getAllCustomCategories();
+      for (CustomCategory category in customCategories) {
+        debugPrint('Category: ${category.name}, Type: ${category.type}');
+      }
+    });
 
-class _HomeScreenState extends State<HomeScreen> {
-  List<Transaction> allTransactions = [];
-  double totalIncome = 0;
-  double totalExpense = 0;
+    final currency = Provider.of<CurrencyProvider>(context).currency;
+    final symbol = currency.symbol;
+    final transactions = context.watch<TransactionProvider>().transactions;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadTransactions();
-  }
+    final screenWidth = MediaQuery.of(context).size.width;
+    final cardWidth = (screenWidth - (horizontalPadding * 3)) / 2;
 
-  void _loadTransactions() {
-    final transactions = TransactionHelper.getAllTransactions();
     double income = 0;
     double expense = 0;
 
@@ -61,21 +63,6 @@ class _HomeScreenState extends State<HomeScreen> {
         expense += t.amount;
       }
     }
-
-    setState(() {
-      allTransactions = transactions;
-      totalIncome = income;
-      totalExpense = expense;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final currency = Provider.of<CurrencyProvider>(context).currency;
-    final symbol = currency.symbol;
-
-    final screenWidth = MediaQuery.of(context).size.width;
-    final cardWidth = (screenWidth - (horizontalPadding * 3)) / 2;
 
     return Scaffold(
       appBar: AppBar(
@@ -106,13 +93,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   Row(
                     children: [
                       _buildStatCard(
-                        '$symbol${totalIncome.toStringAsFixed(0)}',
+                        '$symbol${income.toStringAsFixed(0)}',
                         'Income',
                         cardWidth,
                       ),
                       const SizedBox(width: horizontalPadding),
                       _buildStatCard(
-                        '$symbol${totalExpense.toStringAsFixed(0)}',
+                        '$symbol${expense.toStringAsFixed(0)}',
                         'Expenses',
                         cardWidth,
                       ),
@@ -133,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         const Text('Savings', style: cardTitleStyle),
                         const SizedBox(height: 8),
                         Text(
-                          '$symbol${(totalIncome - totalExpense).toStringAsFixed(0)}',
+                          '$symbol${(income - expense).toStringAsFixed(0)}',
                           style: cardValueStyle,
                         ),
                       ],
@@ -143,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             _sectionHeader('Latest'),
-            ..._buildLatestTransactions(symbol),
+            ..._buildLatestTransactions(transactions, symbol, context),
           ],
         ),
       ),
@@ -157,7 +144,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 builder: (context) => const AddNewTransaction(),
               ),
             );
-            _loadTransactions();
           },
           icon: const Icon(Icons.add, size: 24, color: Colors.white),
           label: const Padding(
@@ -171,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          backgroundColor: Colors.blue,
+          backgroundColor: const Color(0xFF0F70CF),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(28),
           ),
@@ -216,7 +202,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  List<Widget> _buildLatestTransactions(String symbol) {
+  List<Widget> _buildLatestTransactions(
+    List<Transaction> allTransactions,
+    String symbol,
+    BuildContext context,
+  ) {
     final latest = List<Transaction>.from(allTransactions)
       ..sort((a, b) => b.date.compareTo(a.date));
     final latestThree = latest.take(3).toList();
@@ -226,14 +216,41 @@ class _HomeScreenState extends State<HomeScreen> {
         key: Key(transaction.id),
         direction: DismissDirection.endToStart,
         background: Container(
-          color: Colors.red,
           alignment: Alignment.centerRight,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.only(right: 20),
+          color: Colors.red,
           child: const Icon(Icons.delete, color: Colors.white),
         ),
+        confirmDismiss: (_) async {
+          final confirm = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text("Delete Transaction"),
+              content: const Text(
+                "Are you sure you want to delete this transaction?",
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text(
+                    "Delete",
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ],
+            ),
+          );
+          return confirm ?? false;
+        },
         onDismissed: (_) {
-          TransactionHelper.deleteTransaction(transaction.id);
-          _loadTransactions();
+          Provider.of<TransactionProvider>(
+            context,
+            listen: false,
+          ).deleteTransaction(transaction.id);
         },
         child: _buildTransactionRow(
           transaction.category,

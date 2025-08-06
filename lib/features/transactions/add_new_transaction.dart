@@ -5,6 +5,7 @@ import 'package:mactest/features/models/transaction.dart';
 import 'package:mactest/features/providers/currency_provider.dart';
 import 'package:mactest/features/services/data_service.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class AddNewTransaction extends StatefulWidget {
   final String? selectedCategory;
@@ -23,17 +24,12 @@ class AddNewTransaction extends StatefulWidget {
 }
 
 class _AddNewTransactionState extends State<AddNewTransaction> {
-  //used to determine if the transaction is an expense or income
   String selectedType = 'expense';
-  //used to store the selected category and icon
   String? category;
-  //used to store the selected icon
   IconData? selectedIcon;
-  //used to store the type of transaction, either expense or income
   String? transactionType;
 
   DateTime selectedDate = DateTime.now();
-  final IconData calendarIcon = Icons.calendar_today_outlined;
   final TextEditingController amountController = TextEditingController();
   final TextEditingController noteController = TextEditingController();
 
@@ -79,8 +75,6 @@ class _AddNewTransactionState extends State<AddNewTransaction> {
   void _openCategorySelector() async {
     final newCategory = await Navigator.push<String>(
       context,
-
-      //need to pass the type of transaction to the category screen
       MaterialPageRoute(
         builder: (context) => AddCategoryScreen(transactionType: selectedType),
       ),
@@ -103,24 +97,16 @@ class _AddNewTransactionState extends State<AddNewTransaction> {
       return;
     }
 
-    // final iconData = widget.transactionIcon?.icon ?? Icons.category;
-    // final fontFamily =
-    //     widget.transactionIcon?.icon?.fontFamily ?? 'MaterialIcons';
-
     final transaction = Transaction(
+      id: const Uuid().v4(),
       type: selectedType,
       category: category ?? 'Uncategorized',
       amount: double.parse(amountText),
       date: selectedDate,
       note: note,
-      // iconCodePoint:
-      //     widget.transactionIcon?.icon?.codePoint ?? Icons.category.codePoint,
-      // iconFontFamily:
-      //     widget.transactionIcon?.icon?.fontFamily ?? 'MaterialIcons',
     );
 
     TransactionHelper.addTransaction(transaction);
-
     Navigator.pop(context);
   }
 
@@ -156,207 +142,250 @@ class _AddNewTransactionState extends State<AddNewTransaction> {
         ),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // Type Selector
-            Container(
-              height: 40,
-              decoration: BoxDecoration(
-                color: const Color(0xFF2A2D31),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                children: ['expense', 'income'].map((type) {
-                  final isSelected = selectedType == type;
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() => selectedType = type),
-                      child: Container(
-                        margin: const EdgeInsets.all(4),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Type Selector
+                      Container(
+                        height: 40,
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFF121417) : null,
+                          color: const Color(0xFF2A2D31),
                           borderRadius: BorderRadius.circular(16),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 4,
-                                  ),
-                                ]
-                              : null,
                         ),
-                        child: Center(
-                          child: Text(
-                            type[0].toUpperCase() + type.substring(1),
-                            style: TextStyle(
-                              color: isSelected
-                                  ? Colors.white
-                                  : const Color(0xFF9CA3AF),
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14,
+                        child: Row(
+                          children: ['expense', 'income'].map((type) {
+                            final isSelected = selectedType == type;
+                            return Expanded(
+                              child: GestureDetector(
+                                onTap: () =>
+                                    setState(() => selectedType = type),
+                                child: Container(
+                                  margin: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? const Color(0xFF121417)
+                                        : null,
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: isSelected
+                                        ? [
+                                            BoxShadow(
+                                              color: Colors.black.withOpacity(
+                                                0.1,
+                                              ),
+                                              blurRadius: 4,
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      type[0].toUpperCase() + type.substring(1),
+                                      style: TextStyle(
+                                        color: isSelected
+                                            ? Colors.white
+                                            : const Color(0xFF9CA3AF),
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+
+                      // Category
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('Category', style: textStyleLabel),
+                      ),
+                      const SizedBox(height: 12),
+                      GestureDetector(
+                        onTap: _openCategorySelector,
+                        child: Container(
+                          height: 72,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF2A2D31),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(
+                                  Icons.add,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                category ?? 'Add Category',
+                                style: textStyleInput.copyWith(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Amount
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('Amount', style: textStyleLabel),
+                      ),
+                      const SizedBox(height: 12),
+                      Consumer<CurrencyProvider>(
+                        builder: (context, currencyProvider, _) {
+                          return Container(
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2A2D31),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: TextField(
+                              controller: amountController,
+                              style: textStyleInput,
+                              decoration: InputDecoration(
+                                hintText:
+                                    '${currencyProvider.currency.symbol}0.00',
+                                hintStyle: const TextStyle(
+                                  color: Color(0xFF9CA3AF),
+                                ),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 14,
+                                ),
+                              ),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                            ),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Date
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Date', style: textStyleLabel),
+                          Flexible(
+                            child: GestureDetector(
+                              onTap: _pickDate,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        DateFormat.yMMMd().format(selectedDate),
+                                        style: textStyleInput.copyWith(
+                                          color: Colors.white,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Icon(
+                                      Icons.calendar_today_outlined,
+                                      color: Color(0xFF9CA3AF),
+                                      size: 20,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Note
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('Note', style: textStyleLabel),
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2A2D31),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: TextField(
+                          controller: noteController,
+                          style: textStyleInput,
+                          decoration: const InputDecoration(
+                            hintText: 'Add a note',
+                            hintStyle: TextStyle(color: Color(0xFF9CA3AF)),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-            const SizedBox(height: 32),
 
-            // Category
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text('Category', style: textStyleLabel),
-            ),
-            const SizedBox(height: 12),
-            GestureDetector(
-              onTap: _openCategorySelector,
-              child: Container(
-                height: 72,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF2A2D31),
-                        borderRadius: BorderRadius.circular(12),
+                      const Spacer(),
+
+                      // Save Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton(
+                          onPressed: _saveTransaction,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFE5E7EB),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(26),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: const Text(
+                            'Save',
+                            style: TextStyle(
+                              color: Color(0xFF1A1D21),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
                       ),
-                      child: const Icon(Icons.add, color: Colors.white),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      category ?? 'Add Category',
-                      style: textStyleInput.copyWith(color: Colors.white),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-            // Amount
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text('Amount', style: textStyleLabel),
-            ),
-            const SizedBox(height: 12),
-            Consumer<CurrencyProvider>(
-              builder: (context, currencyProvider, _) {
-                return Container(
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2A2D31),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: TextField(
-                    controller: amountController,
-                    style: textStyleInput,
-                    decoration: InputDecoration(
-                      hintText: '${currencyProvider.currency.symbol}0.00',
-                      hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                );
-              },
-            ),
-
-            const SizedBox(height: 24),
-
-            // Date
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Date', style: textStyleLabel),
-                Row(
-                  children: [
-                    Text(
-                      DateFormat.yMMMd().format(selectedDate),
-                      style: textStyleInput.copyWith(color: Colors.white),
-                    ),
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: _pickDate,
-                      child: const Icon(
-                        Icons.calendar_today_outlined,
-                        color: Color(0xFF9CA3AF),
-                        size: 20,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 24),
-
-            // Note
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text('Note', style: textStyleLabel),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              height: 48,
-              decoration: BoxDecoration(
-                color: const Color(0xFF2A2D31),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: TextField(
-                controller: noteController,
-                style: textStyleInput,
-                decoration: const InputDecoration(
-                  hintText: 'Add a note',
-                  hintStyle: TextStyle(color: Color(0xFF9CA3AF)),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
+                      const SizedBox(height: 16),
+                    ],
                   ),
                 ),
               ),
-            ),
-
-            const Spacer(),
-
-            // Save Button
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: _saveTransaction,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE5E7EB),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(26),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  'Save',
-                  style: TextStyle(
-                    color: Color(0xFF1A1D21),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
+            );
+          },
         ),
       ),
     );

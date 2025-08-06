@@ -46,6 +46,96 @@ class _ReportScreenState extends State<ReportScreen> {
 
   static const double _verticalSpacing = 16.0;
 
+  // Helper method to get category totals
+  Map<String, double> _getCategoryTotals(bool isExpenseTab) {
+    final Map<String, double> categoryTotals = {};
+    final filteredTransactions = allTransactions
+        .where((tx) => tx.type == (isExpenseTab ? 'expense' : 'income'))
+        .toList();
+
+    for (var transaction in filteredTransactions) {
+      categoryTotals[transaction.category] =
+          (categoryTotals[transaction.category] ?? 0) + transaction.amount;
+    }
+
+    return categoryTotals;
+  }
+
+  // Category bar widget
+  Widget _buildCategoryBar(
+    String category,
+    double amount,
+    double maxAmount,
+    String currencySymbol,
+  ) {
+    final percentage = maxAmount > 0 ? amount / maxAmount : 0.0;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          // Category label
+          SizedBox(
+            width: 100,
+            child: Text(
+              category,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Inter',
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 12),
+
+          // Progress bar
+          Expanded(
+            child: Stack(
+              alignment: Alignment.centerLeft,
+              children: [
+                // Bar background
+                Container(
+                  height: 22,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF243647), // Background color
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+
+                // Filled part of the bar (with actual percentage)
+                FractionallySizedBox(
+                  widthFactor: percentage.clamp(0.0, 1.0),
+                  child: Container(
+                    height: 22,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF3B8ED4), // Fill color (blue)
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                ),
+
+                // Amount text inside
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    '${currencySymbol}${amount.toStringAsFixed(0)}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTabContent({
     required bool isExpenseTab,
     required double horizontalPadding,
@@ -57,6 +147,12 @@ class _ReportScreenState extends State<ReportScreen> {
     final filteredTransactions = allTransactions
         .where((tx) => tx.type == (isExpenseTab ? 'expense' : 'income'))
         .toList();
+
+    // Get category totals for the progress bars
+    final categoryTotals = _getCategoryTotals(isExpenseTab);
+    final maxAmount = categoryTotals.values.isEmpty
+        ? 0.0
+        : categoryTotals.values.reduce((a, b) => a > b ? a : b);
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -169,58 +265,31 @@ class _ReportScreenState extends State<ReportScreen> {
                   style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
                 const SizedBox(height: _verticalSpacing),
-                SizedBox(
-                  height: screenHeight * 0.4,
-                  child: ListView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: filteredTransactions.length,
-                    itemBuilder: (context, index) {
-                      final tx = filteredTransactions[index];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12.0),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 4.0,
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  tx.category,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    height: 22 / 13,
-                                    fontFamily: 'Inter',
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                height: 28.0,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(6.0),
-                                ),
-                                child: Text(
-                                  '$currencySymbol${tx.amount.toStringAsFixed(0)}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    height: 22 / 13,
-                                    fontFamily: 'Inter',
-                                  ),
-                                ),
-                              ),
-                            ],
+
+                // REPLACED LISTVIEW WITH CATEGORY BARS SECTION
+                categoryTotals.isEmpty
+                    ? Container(
+                        height: 100,
+                        alignment: Alignment.center,
+                        child: Text(
+                          'No ${isExpenseTab ? 'expenses' : 'income'} found',
+                          style: const TextStyle(
+                            color: Colors.white54,
+                            fontSize: 16,
+                            fontFamily: 'Inter',
                           ),
                         ),
-                      );
-                    },
-                  ),
-                ),
+                      )
+                    : Column(
+                        children: categoryTotals.entries.map((entry) {
+                          return _buildCategoryBar(
+                            entry.key,
+                            entry.value,
+                            maxAmount,
+                            currencySymbol,
+                          );
+                        }).toList(),
+                      ),
               ],
             ),
           ),
@@ -268,7 +337,7 @@ class _ReportScreenState extends State<ReportScreen> {
               child: TabBar(
                 indicator: BoxDecoration(
                   color: const Color(0xFF1D2833),
-                  border: Border(
+                  border: const Border(
                     bottom: BorderSide(color: Colors.white, width: 3),
                   ),
                 ),

@@ -44,6 +44,11 @@ class _AddCustomCategoryState extends State<AddCustomCategory> {
       final box = await Hive.openBox<CustomCategory>('custom_categories');
       await box.add(newCategory);
 
+      // ✅ Console confirmation
+      print(
+        '✅ Custom category "${newCategory.name}" added of type "${newCategory.type}"',
+      );
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

@@ -5,108 +5,106 @@ import 'package:mactest/features/category/add_category_screen.dart';
 final List<CategoryItem> allCategories = [
   // Expense Categories
   CategoryItem(
-    title: 'Groceries',
-    icon: Icons.shopping_cart_outlined,
-    type: 'Expense',
-  ),
-  CategoryItem(
-    title: 'Transportation',
-    icon: Icons.directions_car_outlined,
-    type: 'Expense',
-  ),
-  CategoryItem(
     title: 'Utilities',
-    icon: Icons.receipt_outlined,
+    imagePath: 'assets/Groceries.png',
     type: 'Expense',
   ),
   CategoryItem(
     title: 'Mobile & Internet',
-    icon: Icons.wifi_outlined,
+    imagePath: 'assets/Transportation.png',
+    type: 'Expense',
+  ),
+  CategoryItem(
+    title: 'Utilities',
+    imagePath: 'assets/Utilities.png',
+    type: 'Expense',
+  ),
+  CategoryItem(
+    title: 'Mobile & Internet',
+    imagePath: 'assets/Mobile & Internet.png',
     type: 'Expense',
   ),
   CategoryItem(
     title: 'Rent/Mortgage',
-    icon: Icons.home_outlined,
+    imagePath:
+        'assets/Home.png', // Assuming 'Rent/Mortgage' uses the 'Home' icon
     type: 'Expense',
   ),
   CategoryItem(
     title: 'Healthcare',
-    icon: Icons.local_hospital_outlined,
+    imagePath: 'assets/Healthcare.png',
     type: 'Expense',
   ),
   CategoryItem(
     title: 'Clothing & Shoes',
-    icon: Icons.checkroom_outlined,
+    imagePath: 'assets/Clothing & Shoes.png',
     type: 'Expense',
   ),
   CategoryItem(
     title: 'Entertainment',
-    icon: Icons.movie_outlined,
+    imagePath: 'assets/Entertainment.png',
     type: 'Expense',
   ),
   CategoryItem(
     title: 'Education',
-    icon: Icons.school_outlined,
+    imagePath: 'assets/Education.png',
     type: 'Expense',
   ),
-  CategoryItem(title: 'Home', icon: Icons.home_filled, type: 'Expense'),
-  CategoryItem(
-    title: 'Gifts',
-    icon: Icons.card_giftcard_outlined,
-    type: 'Expense',
-  ),
-  CategoryItem(title: 'Pets', icon: Icons.pets_outlined, type: 'Expense'),
+  CategoryItem(title: 'Home', imagePath: 'assets/Home.png', type: 'Expense'),
+  CategoryItem(title: 'Gifts', imagePath: 'assets/Gifts.png', type: 'Expense'),
+  CategoryItem(title: 'Pets', imagePath: 'assets/Pets.png', type: 'Expense'),
   CategoryItem(
     title: 'Sports & Fitness',
-    icon: Icons.fitness_center_outlined,
+    imagePath: 'assets/Sports & Fitness.png',
     type: 'Expense',
   ),
   CategoryItem(
     title: 'Children',
-    icon: Icons.child_friendly_outlined,
+    imagePath: 'assets/Children.png',
     type: 'Expense',
   ),
   CategoryItem(
     title: 'Insurances',
-    icon: Icons.security_outlined,
+    imagePath: 'assets/Insurances.png',
     type: 'Expense',
   ),
   CategoryItem(
     title: 'Taxes & Fines',
-    icon: Icons.receipt_long_outlined,
+    imagePath: 'assets/Taxes & Fines.png',
     type: 'Expense',
   ),
   CategoryItem(
     title: 'Travel',
-    icon: Icons.flight_takeoff_outlined,
+    imagePath: 'assets/Travel.png',
     type: 'Expense',
   ),
   CategoryItem(
     title: 'Business Expenses',
-    icon: Icons.business_center_outlined,
+    imagePath: 'assets/Business Expenses.png',
     type: 'Expense',
   ),
   CategoryItem(
     title: 'Charity',
-    icon: Icons.volunteer_activism_outlined,
+    imagePath: 'assets/Charity.png',
     type: 'Expense',
   ),
 
   // Income Categories
   CategoryItem(
     title: 'Salary',
-    icon: Icons.attach_money_outlined,
+    imagePath:
+        'assets/Salary.png', // Assuming 'Salaty.png' is a typo and should be 'Salary.png'
     type: 'Income',
   ),
   CategoryItem(
     title: 'Bonuses',
-    icon: Icons.monetization_on_outlined,
+    imagePath: 'assets/Bonuses.png',
     type: 'Income',
   ),
-  CategoryItem(title: 'Freelance', icon: Icons.work_outline, type: 'Income'),
   CategoryItem(
-    title: 'Gifts',
-    icon: Icons.card_giftcard_outlined,
+    title: 'Freelance',
+    imagePath: 'assets/Freelance.png',
     type: 'Income',
   ),
+  CategoryItem(title: 'Gifts', imagePath: 'assets/Gifts.png', type: 'Income'),
 ];

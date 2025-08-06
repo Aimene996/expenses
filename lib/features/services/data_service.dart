@@ -1,6 +1,17 @@
 // transaction_model.dart
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:mactest/features/models/custom_category.dart';
 import 'package:mactest/features/models/transaction.dart';
+
+enum DateFilterType {
+  last30Days,
+  thisMonth,
+  lastMonth,
+  thisWeek,
+  lastWeek,
+  custom,
+}
 
 // helper: transaction_helper.dart
 class TransactionHelper {
@@ -38,16 +49,76 @@ class TransactionHelper {
         )
         .toList();
   }
+
+  static List<Transaction> getFilteredTransactions(
+    DateFilterType filter, {
+    DateTimeRange? customRange,
+  }) {
+    final allTransactions = getAllTransactions();
+    final now = DateTime.now();
+
+    DateTime start;
+    DateTime end = now;
+
+    switch (filter) {
+      case DateFilterType.last30Days:
+        start = now.subtract(const Duration(days: 30));
+        break;
+      case DateFilterType.thisMonth:
+        start = DateTime(now.year, now.month, 1);
+        break;
+      case DateFilterType.lastMonth:
+        final prevMonth = DateTime(now.year, now.month - 1, 1);
+        start = prevMonth;
+        end = DateTime(
+          now.year,
+          now.month,
+          1,
+        ).subtract(const Duration(days: 1));
+        break;
+      case DateFilterType.thisWeek:
+        final weekday = now.weekday;
+        start = now.subtract(Duration(days: weekday - 1));
+        break;
+      case DateFilterType.lastWeek:
+        final weekday = now.weekday;
+        end = now.subtract(Duration(days: weekday));
+        start = end.subtract(const Duration(days: 6));
+        break;
+      case DateFilterType.custom:
+        if (customRange == null) return [];
+        start = customRange.start;
+        end = customRange.end;
+        break;
+    }
+
+    return allTransactions.where((tx) {
+      return tx.date.isAfter(start.subtract(const Duration(seconds: 1))) &&
+          tx.date.isBefore(end.add(const Duration(days: 1)));
+    }).toList();
+  }
+
+  // ✅ Save a custom category
+  static Future<void> saveCustomCategory(CustomCategory category) async {
+    final box = await Hive.openBox<CustomCategory>('custom_categories');
+    await box.add(category);
+  }
+
+  // ✅ Get all custom categories
+  static Future<List<CustomCategory>> getAllCustomCategories() async {
+    final box = await Hive.openBox<CustomCategory>('custom_categories');
+    return box.values.toList();
+  }
+
+  // // currency_settings.dart
+  // @HiveType(typeId: 1)
+  // class CurrencySettings extends HiveObject {
+  //   @HiveField(0)
+  //   final String symbol;
+
+  //   CurrencySettings({required this.symbol});
+  // }
+
+  // To generate adapters:
+  // flutter pub run build_runner build --delete-conflicting-outputs
 }
-
-// // currency_settings.dart
-// @HiveType(typeId: 1)
-// class CurrencySettings extends HiveObject {
-//   @HiveField(0)
-//   final String symbol;
-
-//   CurrencySettings({required this.symbol});
-// }
-
-// To generate adapters:
-// flutter pub run build_runner build --delete-conflicting-outputs

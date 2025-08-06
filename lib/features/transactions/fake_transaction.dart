@@ -16,6 +16,7 @@ class FakeTransaction extends StatefulWidget {
 
 class _FakeTransactionState extends State<FakeTransaction> {
   Map<String, List<Transaction>> groupedTransactions = {};
+  Set<String> deletingTransactions = {};
 
   @override
   void initState() {
@@ -37,9 +38,83 @@ class _FakeTransactionState extends State<FakeTransaction> {
     });
   }
 
-  Future<void> _deleteTransaction(String id) async {
-    await TransactionHelper.deleteTransaction(id);
-    _loadTransactions();
+  Future<bool> _showDeleteConfirmation(
+    BuildContext context,
+    Transaction tx,
+  ) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              backgroundColor: const Color(0xFF293038),
+              title: const Text(
+                'Delete Transaction',
+                style: TextStyle(color: Colors.white),
+              ),
+              content: Text(
+                'Are you sure you want to delete this ${tx.category} transaction?',
+                style: const TextStyle(color: Color(0xFF9EABBA)),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Color(0xFF9EABBA)),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text(
+                    'Delete',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+  }
+
+  Future<bool> _deleteTransaction(String id, Transaction tx) async {
+    if (deletingTransactions.contains(id)) return false;
+
+    final shouldDelete = await _showDeleteConfirmation(context, tx);
+    if (!shouldDelete) return false;
+
+    setState(() {
+      deletingTransactions.add(id);
+
+      // Remove the transaction locally from groupedTransactions
+      final key = DateFormat('MMMM yyyy').format(tx.date);
+      final list = groupedTransactions[key];
+      if (list != null) {
+        list.removeWhere((t) => t.id == id);
+        if (list.isEmpty) {
+          groupedTransactions.remove(key); // remove group if empty
+        }
+      }
+    });
+
+    try {
+      await TransactionHelper.deleteTransaction(id);
+      if (mounted) {
+        setState(() {
+          deletingTransactions.remove(id);
+        });
+        // Optionally reload full list here if needed
+        // _loadTransactions();
+      }
+      return true;
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          deletingTransactions.remove(id);
+        });
+      }
+      return false;
+    }
   }
 
   @override
@@ -147,9 +222,17 @@ class _FakeTransactionState extends State<FakeTransaction> {
                         final tx = transactions[index];
                         final prefix = tx.type == 'expense' ? '-' : '+';
 
+                        // Skip rendering transactions that are being deleted
+                        if (deletingTransactions.contains(tx.id)) {
+                          return const SizedBox.shrink();
+                        }
+
                         return Dismissible(
-                          key: Key(tx.id),
+                          key: ValueKey(tx.id),
                           direction: DismissDirection.endToStart,
+                          confirmDismiss: (direction) async {
+                            return await _deleteTransaction(tx.id, tx);
+                          },
                           background: Container(
                             color: Colors.red,
                             alignment: Alignment.centerRight,
@@ -159,7 +242,6 @@ class _FakeTransactionState extends State<FakeTransaction> {
                               color: Colors.white,
                             ),
                           ),
-                          onDismissed: (_) => _deleteTransaction(tx.id),
                           child: ListTile(
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,

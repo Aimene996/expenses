@@ -22,6 +22,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       return category.type.toLowerCase() ==
           widget.transactionType.toLowerCase();
     }).toList();
+    print(selectedCategory);
   }
 
   @override
@@ -99,7 +100,13 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                         ),
                         child: Row(
                           children: [
-                            Icon(category.icon, color: Colors.white, size: 20),
+                            Image.asset(
+                              category.imagePath,
+                              width: 24,
+                              height: 24,
+                              color: Colors.white,
+                            ),
+                            // Icon(category.imagePath, color: Colors.white, size: 20),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
@@ -196,8 +203,12 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
 // Category item model stays the same
 class CategoryItem {
   final String title;
-  final IconData icon;
+  final String imagePath;
   final String type;
 
-  CategoryItem({required this.title, required this.icon, required this.type});
+  CategoryItem({
+    required this.title,
+    required this.imagePath,
+    required this.type,
+  });
 }

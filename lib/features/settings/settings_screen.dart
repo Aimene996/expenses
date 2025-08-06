@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mactest/features/models/custom_category.dart';
 import 'package:mactest/features/providers/currency_provider.dart';
+import 'package:mactest/features/services/custom_category_helper.dart';
 import 'package:mactest/features/services/settings_helper.dart';
 import 'package:mactest/features/settings/widgets/reset_dialog.dart';
 import 'package:mactest/features/models/currency.dart';
@@ -13,8 +15,30 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  final List<String> incomeCategories = ['Salary'];
-  final List<String> expensesCategories = ['Groceries'];
+  List<CustomCategory> incomeCategories = [];
+  List<CustomCategory> expensesCategories = [];
+
+  void fetchCustomCategories() async {
+    final customCategories =
+        await CustomCategoryHelper.getAllCustomCategories();
+
+    final List<CustomCategory> incomeList = [];
+    final List<CustomCategory> expenseList = [];
+
+    for (CustomCategory category in customCategories) {
+      if (category.type.toLowerCase() == 'income') {
+        incomeList.add(category);
+      } else if (category.type.toLowerCase() == 'expense') {
+        expenseList.add(category);
+      }
+      debugPrint('Category: ${category.name}, Type: ${category.type}');
+    }
+
+    setState(() {
+      incomeCategories = incomeList;
+      expensesCategories = expenseList;
+    });
+  }
 
   String selectedCurrencyCode = 'USD';
 
@@ -35,6 +59,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     _loadCurrency();
+    _loadCategories();
+    fetchCustomCategories();
   }
 
   Future<void> _loadCurrency() async {
@@ -42,6 +68,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       selectedCurrencyCode = currency.code;
     });
+  }
+
+  Future<void> _loadCategories() async {
+    final income = await CustomCategoryHelper.getCustomCategoriesByType(
+      'Income',
+    );
+    final expense = await CustomCategoryHelper.getCustomCategoriesByType(
+      'Expense',
+    );
+    setState(() {
+      incomeCategories = income;
+      expensesCategories = expense;
+    });
+  }
+
+  Future<void> _deleteCategory(CustomCategory category) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Category'),
+        content: Text('Are you sure you want to delete "${category.name}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await category.delete();
+      await _loadCategories();
+    }
   }
 
   @override
@@ -60,134 +124,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 16),
+                    _buildCurrencyDropdown(),
 
-                    // Currency section
-                    Container(
-                      width: 390,
-                      height: 56,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Currency',
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                            ),
-                          ),
-                          DropdownButton<String>(
-                            value: selectedCurrencyCode,
-                            underline: const SizedBox(),
-                            icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                            onChanged: (String? newValue) async {
-                              if (newValue != null) {
-                                setState(() {
-                                  selectedCurrencyCode = newValue;
-                                });
+                    _buildSectionTitle('Custom Categories'),
+                    _buildSubTitle('Income'),
+                    _buildCategoryWrap(incomeCategories),
 
-                                final match = currencies.firstWhere(
-                                  (c) => c.startsWith(newValue),
-                                );
-                                final parts = match.split(' – ');
-                                final selected = Currency(
-                                  code: parts[0],
-                                  symbol: parts[1],
-                                  name: parts[2],
-                                );
-
-                                // ✅ Use provider to update currency and notify listeners
-                                Provider.of<CurrencyProvider>(
-                                  context,
-                                  listen: false,
-                                ).updateCurrency(selected);
-                              }
-                            },
-
-                            items: currencies.map((String value) {
-                              final code = value.split(' – ')[0];
-                              return DropdownMenuItem<String>(
-                                value: code,
-                                child: Text(code),
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Custom Categories Title
-                    Container(
-                      width: 390,
-                      height: 47,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: const Padding(
-                        padding: EdgeInsets.only(top: 16, right: 16, bottom: 8),
-                        child: Text(
-                          'Custom Categories',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w700,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 26, top: 12, bottom: 4),
-                      child: Text(
-                        'Income',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w400,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Wrap(
-                        spacing: 12,
-                        runSpacing: 8,
-                        children: incomeCategories
-                            .map(
-                              (category) =>
-                                  _buildCategoryCard(context, category),
-                            )
-                            .toList(),
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    const Padding(
-                      padding: EdgeInsets.only(left: 26, top: 12, bottom: 4),
-                      child: Text(
-                        'Expenses',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w400,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Wrap(
-                        spacing: 12,
-                        runSpacing: 8,
-                        children: expensesCategories
-                            .map(
-                              (category) =>
-                                  _buildCategoryCard(context, category),
-                            )
-                            .toList(),
-                      ),
-                    ),
+                    _buildSubTitle('Expenses'),
+                    _buildCategoryWrap(expensesCategories),
 
                     const Spacer(),
 
@@ -233,7 +177,105 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildCategoryCard(BuildContext context, String title) {
+  Widget _buildCurrencyDropdown() {
+    return Container(
+      width: 390,
+      height: 56,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            'Currency',
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontWeight: FontWeight.w400,
+              fontSize: 16,
+            ),
+          ),
+          DropdownButton<String>(
+            value: selectedCurrencyCode,
+            underline: const SizedBox(),
+            icon: const Icon(Icons.keyboard_arrow_down_rounded),
+            onChanged: (String? newValue) async {
+              if (newValue != null) {
+                setState(() {
+                  selectedCurrencyCode = newValue;
+                });
+
+                final match = currencies.firstWhere(
+                  (c) => c.startsWith(newValue),
+                );
+                final parts = match.split(' – ');
+                final selected = Currency(
+                  code: parts[0],
+                  symbol: parts[1],
+                  name: parts[2],
+                );
+
+                Provider.of<CurrencyProvider>(
+                  context,
+                  listen: false,
+                ).updateCurrency(selected);
+              }
+            },
+            items: currencies.map((String value) {
+              final code = value.split(' – ')[0];
+              return DropdownMenuItem<String>(value: code, child: Text(code));
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Container(
+      width: 390,
+      height: 47,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 16, right: 16, bottom: 8),
+        child: Text(
+          title,
+          style: const TextStyle(
+            fontFamily: 'Inter',
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubTitle(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 26, top: 12, bottom: 4),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontFamily: 'Inter',
+          fontWeight: FontWeight.w400,
+          fontSize: 16,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryWrap(List<CustomCategory> categories) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Wrap(
+        spacing: 12,
+        runSpacing: 8,
+        children: categories
+            .map((category) => _buildCategoryCard(context, category))
+            .toList(),
+      ),
+    );
+  }
+
+  Widget _buildCategoryCard(BuildContext context, CustomCategory category) {
     return Container(
       width: 173,
       height: 58,
@@ -248,7 +290,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              title,
+              category.name,
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -257,7 +299,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          const Icon(Icons.delete, size: 20),
+          GestureDetector(
+            onTap: () => _deleteCategory(category),
+            child: const Icon(Icons.delete, size: 20),
+          ),
         ],
       ),
     );
